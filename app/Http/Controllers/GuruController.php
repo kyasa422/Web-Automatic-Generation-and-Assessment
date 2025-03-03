@@ -70,4 +70,10 @@ class GuruController extends Controller
 
         ]);
     }
+
+    public function generatesoal(Request $request): Response
+    {
+        return Inertia::render('Guru/Generatesoal', [
+        ]);
+    }
 }

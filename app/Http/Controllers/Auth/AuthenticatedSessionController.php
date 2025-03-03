@@ -42,12 +42,9 @@ public function store(LoginRequest $request): RedirectResponse
         return redirect()->route('admin.dashboard');
     } elseif ($user->hasRole('Guru')) {
         return redirect()->route('guru.dashboard');
-    } elseif ($user->hasRole('Private')) {
-        return redirect()->route('private.dashboard');
-    } elseif ($user->hasRole('Mitra')) {
-        return redirect()->route('mitra.dashboard');
+    } elseif ($user->hasRole('Siswa')) {
+        return redirect()->route('siswa.dashboard');
     }
-
     // Jika user tidak punya role khusus, arahkan ke dashboard umum
     return redirect()->route('dashboard');
 }

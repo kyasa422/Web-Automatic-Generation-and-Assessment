@@ -10,6 +10,7 @@ use App\Http\Controllers\MitraController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\SiswaController;
 
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -77,6 +78,12 @@ Route::delete('/admin/users/{id}', [UserController::class, 'destroy'])
 //     Route::get('/private', [AdminController::class, 'private'])->name('admin.private');
 //     Route::get('/guru', [AdminController::class, 'guru'])->name('admin.guru');
 // });
+
+
+// Generate Soal Guru
+Route::get('/guru/generated-soal', [GuruController::class, 'generatesoal'])
+    ->middleware(['auth', 'role:Guru'])
+    ->name('guru.generatesoal');
 
 // Admin Controll Cabanggit
     Route::get('/admin/cabangs', [CabangController::class, 'index'])
@@ -215,6 +222,12 @@ Route::patch('/admin/settings', [AdminController::class, 'update'])
 Route::get('guru/dashboard', [GuruController::class, 'index'])
     ->middleware(['auth', 'role:Guru'])
     ->name('guru.dashboard');
+
+// Route untuk Siswa
+Route::get('/siswa/dashboard', [SiswaController::class, 'index']) 
+    ->middleware(['auth', 'role:Siswa'])
+    ->name('siswa.dashboard');
+
 // Route untuk Private
 Route::get('/private/dashboard', [PrivateController::class, 'index'])
     ->middleware(['auth', 'role:Private'])
@@ -223,13 +236,15 @@ Route::get('/private/dashboard', [PrivateController::class, 'index'])
 Route::get('/mitra/dashboard', [MitraController::class, 'index'])
     ->middleware(['auth', 'role:Mitra'])
     ->name('mitra.dashboard');
-    Route::get('/admin/dashboard', function () {
-        return Inertia::render('Admin/Dashboard');
-    })->middleware(['auth', 'role:Admin'])->name('admin.dashboard');
+Route::get('/admin/dashboard', function () {
+    return Inertia::render('Admin/Dashboard');
+})->middleware(['auth', 'role:Admin'])->name('admin.dashboard');
     
-    Route::get('/admin/dashboard', [AdminController::class, 'index'])
-        ->middleware(['auth', 'role:Admin'])
-        ->name('admin.dashboard');
+Route::get('/admin/dashboard', [AdminController::class, 'index'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.dashboard');
+
+
 
 
 

@@ -5,7 +5,7 @@ import { useState } from "react";
 import Sidebar from "@/Components/Sidebar/Sidebar";
 import Header from "@/Components/Header/Header";
 
-const DefaultLayout = ({ children }) => {
+const DefaultLayout = ({ children, noPadding = false   }) => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     return (
 
@@ -24,11 +24,10 @@ const DefaultLayout = ({ children }) => {
             {/* <!-- ===== Header End ===== --> */}
   
             {/* <!-- ===== Main Content Start ===== --> */}
-            <main className="bg-slate-100">
-              <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10 ">
-                {children}
-              </div>
-            </main>
+              {/* Cek apakah noPadding true, jika ya hilangkan padding */}
+              <main className={`bg-slate-100 ${noPadding ? "" : "max-w-screen-2xl p-4 md:p-6 2xl:p-10"}`}>
+                        {children}
+                    </main>
             {/* <!-- ===== Main Content End ===== --> */}
           </div>
           {/* <!-- ===== Content Area End ===== --> */}
