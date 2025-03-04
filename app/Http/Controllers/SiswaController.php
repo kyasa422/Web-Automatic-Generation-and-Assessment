@@ -11,7 +11,7 @@ use App\Models\User;
 use App\Models\LapPemasukanCabang;
 use App\Models\LapPengeluaranCabang;
 use Inertia\Response;
-
+use Spatie\Permission\Models\Permission;
 
 
 
@@ -26,6 +26,7 @@ class SiswaController extends Controller
 
         return Inertia::render('Siswa/Index', [
 
+            'permissions' => Auth::user()->getPermissionNames(), // Kirim permission ke React
 
 
         ]);

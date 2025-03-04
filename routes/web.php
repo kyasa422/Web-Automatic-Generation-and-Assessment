@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\SiswaController;
+use App\Http\Controllers\PermissionController;
 
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -30,15 +31,22 @@ Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->middl
 
 
 
+Route::middleware(['auth', 'role:Admin'])->group(function () {
+    Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
+    Route::post('/permissions', [PermissionController::class, 'store'])->name('permissions.store');
+    Route::put('/permissions/{permission}', [PermissionController::class, 'update'])->name('permissions.update');
+    Route::delete('/permissions/{permission}', [PermissionController::class, 'destroy'])->name('permissions.destroy');
+});
+
 
 
 
 // Admin Controll Users
-Route::get('/admin/users', [UserController::class, 'index'])
+Route::get('/admin/usersguru', [UserController::class, 'index'])
     ->middleware(['auth', 'role:Admin'])
-    ->name('admin.users');
+    ->name('admin.usersguru');
 
-Route::get('/admin/users/create', [UserController::class, 'create'])
+Route::get('/admin/usersguru/create', [UserController::class, 'create'])
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.users.create');
 
@@ -62,6 +70,39 @@ Route::delete('/admin/users/{id}', [UserController::class, 'destroy'])
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.users.destroy');
 
+// Admin Controll Users Siswa
+Route::get('/admin/userssiswa', [UserController::class, 'indexsiswa'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.userssiswa');
+
+Route::get('/admin/userssiswa/create', [UserController::class, 'createsiswa'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.userssiswa.create');
+
+Route::post('/admin/userssiswa', [UserController::class, 'storesiswa'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.userssiswa.store');
+
+Route::get('/admin/userssiswa/{id}', [UserController::class, 'showsiswa'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.userssiswa.show');
+
+Route::get('/admin/userssiswa/{id}/edit', [UserController::class, 'editsiswa'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.userssiswa.edit');
+
+Route::put('/admin/userssiswa/{id}', [UserController::class, 'updatesiswa'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.userssiswa.update');
+
+Route::delete('/admin/userssiswa/{id}', [UserController::class, 'destroysiswa'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.userssiswa.destroy');
+
+
+
+
+
 // Grouping untuk Cabang
 // Route::prefix('admin/cabang')->middleware(['auth', 'role:Admin'])->name('admin.cabangs.')->group(function () {
 //     Route::get('/', [CabangController::class, 'index'])->name('index');
@@ -80,10 +121,7 @@ Route::delete('/admin/users/{id}', [UserController::class, 'destroy'])
 // });
 
 
-// Generate Soal Guru
-Route::get('/guru/generated-soal', [GuruController::class, 'generatesoal'])
-    ->middleware(['auth', 'role:Guru'])
-    ->name('guru.generatesoal');
+
 
 // Admin Controll Cabanggit
     Route::get('/admin/cabangs', [CabangController::class, 'index'])
@@ -194,6 +232,16 @@ Route::prefix('rekap')->middleware(['auth', 'role:Admin'])->group(function () {
     Route::get('/mitra', [AdminController::class, 'rekapmitra'])->name('admin.rekap.mitra');
     Route::get('/private', [AdminController::class, 'rekapprivate'])->name('admin.rekap.private');
 });
+
+
+// Generate Soal Guru
+Route::get('/guru/generated-soal', [GuruController::class, 'generatesoal'])
+    ->middleware(['auth', 'role:Guru'])
+    ->name('guru.generatesoal');
+
+Route::get('/guru/generated-soal/create', [GuruController::class, 'soalesai'])
+    ->middleware(['auth', 'role:Guru'])
+    ->name('guru.generated-soal.create');   
             /* -----------------------------------------
                             Settings 
             -------------------------------------------- */

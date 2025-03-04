@@ -73,7 +73,13 @@ class GuruController extends Controller
 
     public function generatesoal(Request $request): Response
     {
-        return Inertia::render('Guru/Generatesoal', [
+        return Inertia::render('Guru/Generate/Index', [
+        ]);
+    }
+
+    public function soalesai(Request $request): Response
+    {
+        return Inertia::render('Guru/Generate/soalesai', [
         ]);
     }
 }

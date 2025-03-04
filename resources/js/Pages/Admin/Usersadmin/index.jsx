@@ -43,7 +43,7 @@ const AdminUsers = () => {
                             <option value="Private">Private</option>
                             <option value="Admin">Admin</option>  
                         </select>
-                        <Link href="/admin/users/create">
+                        <Link href="/admin/usersguru/create">
                             <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
                                 Tambah User
                             </button>

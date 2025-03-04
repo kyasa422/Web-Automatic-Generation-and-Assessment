@@ -3,18 +3,19 @@ import { usePage, useForm } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
 
 const EditUsers = () => {
-    const { user, roles, userRole } = usePage().props; // Mengambil user, roles, dan userRole dari props
+    const { user, roles, userRole, permissions, userPermissions } = usePage().props;
+    
     const { data, setData, put, errors } = useForm({
         name: user.name,
         email: user.email,
-        password: '',
-
-        roles: userRole, // Inisialisasi dengan userRole
+        password: "",
+        roles: userRole,
+        permissions: userPermissions ? userPermissions.map(p => Number(p)) : [] // Pastikan semuanya berupa angka
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        put(`/admin/users/${user.id}`);
+        put(`/admin/userssiswa/${user.id}`);
     };
 
     const handleRoleChange = (e) => {
@@ -22,9 +23,21 @@ const EditUsers = () => {
         setData("roles", selectedRoles);
     };
 
+    const handlePermissionChange = (e) => {
+        const permissionId = parseInt(e.target.value);
+        setData("permissions", e.target.checked
+            ? [...data.permissions, permissionId]
+            : data.permissions.filter(id => id !== permissionId)
+        );
+    };
+    console.log("User Permissions from props:", userPermissions);
+
+    console.log("Updated permissions:", data.permissions);
+
+
     return (
         <DefaultLayout>
-            <h1>Edit User</h1>
+            <h1>Edit User Siswa</h1>
             <form onSubmit={handleSubmit}>
                 <div className="p-6.5">
                     {/* Input untuk Nama */}
@@ -58,7 +71,7 @@ const EditUsers = () => {
                     </div>
 
                     {/* Input untuk Password */}
-                      <div className="w-full xl:w-1/2 mb-4.5">
+                    <div className="w-full xl:w-1/2 mb-4.5">
                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">
                             Password
                         </label>
@@ -72,26 +85,32 @@ const EditUsers = () => {
                         {errors.password && <div className="text-red-500">{errors.password}</div>}
                     </div>
 
-                       
-                    {/* Input untuk Role */}
+              
+
+                    {/* Input untuk Permissions */}
                     <div className="w-full xl:w-1/2 mb-4.5">
-                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                            Role
-                        </label>
-                        <select
-                            multiple
-                            value={data.roles}
-                            onChange={handleRoleChange}
-                            className="w-full rounded border-[1.5px] px-5 py-3 text-black dark:border-form-strokedark dark:bg-form-input dark:text-white focus:border-primary"
-                        >
-                            {roles.map((role) => (
-                                <option key={role.id} value={role.id}>
-                                    {role.name}
-                                </option>
-                            ))}
-                        </select>
-                        {errors.roles && <div className="text-red-500">{errors.roles}</div>}
-                    </div>
+    <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+        Permissions
+    </label>
+    <div>
+        {permissions.map((permission) => (
+            <label key={permission.id} className="block">
+                <input
+                    type="checkbox"
+                    value={permission.id}
+                    checked={data.permissions.includes(Number(permission.id))} // Pastikan tipe data cocok
+                    onChange={handlePermissionChange}
+                    className="mr-2"
+                />
+                {permission.name}
+            </label>
+        ))}
+    </div>
+    {errors.permissions && <div className="text-red-500">{errors.permissions}</div>}
+</div>
+
+
+
                 </div>
                 <button
                     type="submit"
@@ -100,6 +119,8 @@ const EditUsers = () => {
                     Update User
                 </button>
             </form>
+            
+            
         </DefaultLayout>
     );
 };

@@ -8,10 +8,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use App\Models\LapPengeluaranCabang;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Traits\HasPermissions;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasRoles, HasPermissions;
 
     /**
      * The attributes that are mass assignable.
@@ -50,4 +52,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(LapPengeluaranCabang::class, 'guru_id');
     }
+    public function permissions()
+    {
+        return $this->morphToMany(Permission::class, 'model', 'model_has_permissions', 'model_id', 'permission_id');
+    }
+    
 }
