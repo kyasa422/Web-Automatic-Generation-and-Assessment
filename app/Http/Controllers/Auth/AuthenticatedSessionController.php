@@ -46,7 +46,7 @@ public function store(LoginRequest $request): RedirectResponse
         return redirect()->route('siswa.dashboard');
     }
     // Jika user tidak punya role khusus, arahkan ke dashboard umum
-    return redirect()->route('dashboard');
+    return redirect()->route('login');
 }
 
 

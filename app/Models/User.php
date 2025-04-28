@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use App\Models\LapPengeluaranCabang;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Traits\HasPermissions;
 
@@ -25,6 +26,8 @@ class User extends Authenticatable
         'email',
         'password',
     ];
+    protected $guard_name = 'web'; // <- pastikan ini ada
+
 
     /**
      * The attributes that should be hidden for serialization.
@@ -56,5 +59,10 @@ class User extends Authenticatable
     {
         return $this->morphToMany(Permission::class, 'model', 'model_has_permissions', 'model_id', 'permission_id');
     }
-    
+
+    public function questions()
+{
+    return $this->hasMany(Question::class, 'teacherId');
+}
+
 }

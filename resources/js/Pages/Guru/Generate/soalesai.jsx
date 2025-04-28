@@ -1,10 +1,18 @@
 import React, { useState } from "react";
-import { usePage } from "@inertiajs/react";
+import { useForm, usePage } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
 import mammoth from "mammoth";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
+import { FaCheck, FaPencilAlt } from "react-icons/fa";
+import { RiAiGenerate2 } from "react-icons/ri";
+import SweetAlert from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 
 const Esai = () => {
+    const { subject } = usePage().props;
+    const swal = withReactContent(SweetAlert);
+    const geminiApiKey = "AIzaSyDJIobzcimNXBDpamTebwuicdLUm8Sl6Bo";
     const [data, setData] = useState({
         kelas: "",
         mapel: "",
@@ -13,19 +21,51 @@ const Esai = () => {
         jumlahSoalPG: "",
         bahasa: "indonesia",
         tingkatPendidikan: "vocational high school",
-        kesulitan: "MEDIUM"
+        kesulitan: "MEDIUM",
     });
 
     const [response, setResponse] = useState(null);
     const [uploadedFile, setUploadedFile] = useState(null);
     const [fileContent, setFileContent] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [loadingRegenerate, setLoadingRegenerate] = useState(null);
+    const [editQuestion, setEditQuestion] = useState(null);
+    const {
+        data: question,
+        setData: setQuestion,
+        post,
+        processing,
+    } = useForm({
+        response: [],
+        classLevel: "",
+        subjectId: "",
+        examLevel: false,
+    });
 
     function handleChange(e) {
         const { name, value } = e.target;
+        if (name === "tingkat") {
+            if (value === "ulangan tengah semester") {
+                setQuestion("examLevel", false);
+            } else {
+                setQuestion("examLevel", true);
+            }
+        }
+
+        if (name === "mapel") {
+            const selectedSubject = subject.find((e) => e.id === value);
+            if (selectedSubject) {
+                setQuestion("subjectId", selectedSubject.id);
+            }
+        }
+
+        if (name === "kelas") {
+            setQuestion("classLevel", parseInt(value) - 9);
+        }
+
         setData((prevData) => ({
             ...prevData,
-            [name]: value
+            [name]: value,
         }));
     }
 
@@ -74,91 +114,86 @@ const Esai = () => {
         setIsLoading(true);
 
         try {
-            // Use your API key
-            const genAI = new GoogleGenerativeAI(
-                "AIzaSyDJIobzcimNXBDpamTebwuicdLUm8Sl6Bo"
-            );
-
-            // Configure the generative model with JSON schema response format
-            const model = genAI.getGenerativeModel({ 
-                model: "gemini-2.0-flash",
-                generationConfig: {
-                    temperature: 1,
-                    topP: 0.95,
-                    topK: 40,
-                    maxOutputTokens: 8192,
-                    responseMimeType: "application/json"
-                }
-            });
-
-            // Build the prompt with proper formatting
-            let prompt = `{
-                "subject": "${data.mapel}",
-                "classLevel": ${data.kelas},
-                "educationLevel": "vocational high school",
-                "numberOfQuestion": ${data.jumlahSoalEsai || 0},
-                "multipleChoiceCount": ${data.jumlahSoalPG || 0},
-                "language": "indonesia",
-                "questionDifficultyLevel": "${data.kesulitan}",
-                "type": ["ESSAY", "MULTIPLE_CHOICE"],
-                "level": "${data.tingkat}"
-            }`;
-
-            // Add material context if available
-            if (fileContent) {
-                prompt += `\n\nMateri: ${fileContent.substring(0, 1000)}`;
-            }
-
-            prompt += `\n\nUntuk setiap pertanyaan pilihan ganda, berikan empat pilihan jawaban, dengan tepat satu jawaban yang benar dan tiga jawaban yang salah.
-            Generate untuk soal esai dulu baru soal multiplechoice.
-            Jumlah soal esai adalah ${data.jumlahSoalEsai} dan 
-            Jumlah soal pilihan ganda ${data.jumlahSoalPG}.
-            Format JSON sesuai dengan schema berikut:
-            {
-              "response": [
-                {
-                  "type": "ESSAY",
-                  "question": "pertanyaan esai...",
-                  "answer": "jawaban esai..."
-                },
-                {
-                  "type": "MULTIPLE_CHOICE",
-                  "question": "pertanyaan pilihan ganda...",
-                  "answer": "jawaban pilihan ganda...",
-                    "multipleChoice": [
-                    {
-                      "text": "pilihan A",
-                      "isCorrect": true
-                    },
-                    {
-                      "text": "pilihan B",
-                      "isCorrect": false
-                    },
-                    {
-                      "text": "pilihan C",
-                      "isCorrect": false
-                    },
-                    {
-                      "text": "pilihan D",
-                      "isCorrect": false
-                    }
-                  ],
-                 
-                }
-              ]
-            }`;
-
-            const result = await model.generateContent(prompt);
-            const responseText = result.response.text();
-            
-            // Parse the JSON response
             try {
+                const genAI = new GoogleGenerativeAI(geminiApiKey);
+                const model = genAI.getGenerativeModel({
+                    model: "gemini-2.0-flash",
+                    generationConfig: {
+                        temperature: 1,
+                        topP: 0.95,
+                        topK: 40,
+                        maxOutputTokens: 8192,
+                        responseMimeType: "application/json",
+                    },
+                });
+
+                let prompt = `{
+                    "subject": "${
+                        subject.find((e) => e.id === data.mapel).name
+                    }",
+                    "classLevel": ${data.kelas},
+                    "educationLevel": "vocational high school",
+                    "numberOfQuestion": ${data.jumlahSoalEsai || 0},
+                    "multipleChoiceCount": ${data.jumlahSoalPG || 0},
+                    "language": "indonesia",
+                    "questionDifficultyLevel": "${data.kesulitan}",
+                    "type": ["ESSAY", "MULTIPLE_CHOICE"],
+                    "level": "${data.tingkat}"
+                }`;
+
+                if (fileContent) {
+                    prompt += `\n\nMateri: ${fileContent.substring(0, 1000)}`;
+                }
+
+                prompt += `\n\nUntuk setiap pertanyaan pilihan ganda, berikan empat pilihan jawaban, dengan tepat satu jawaban yang benar dan tiga jawaban yang salah.
+                Generate untuk soal esai dulu baru soal multiplechoice.
+                Jumlah soal esai adalah ${data.jumlahSoalEsai} dan 
+                Jumlah soal pilihan ganda ${data.jumlahSoalPG}.
+                Format JSON sesuai dengan schema berikut:
+                {
+                  "response": [
+                    {
+                      "type": "ESSAY",
+                      "question": "pertanyaan esai...",
+                      "answer": "jawaban esai..."
+                    },
+                    {
+                      "type": "MULTIPLE_CHOICE",
+                      "question": "pertanyaan pilihan ganda...",
+                        "multipleChoice": [
+                        {
+                          "text": "pilihan A",
+                          "isCorrect": true
+                        },
+                        {
+                          "text": "pilihan B",
+                          "isCorrect": false
+                        },
+                        {
+                          "text": "pilihan C",
+                          "isCorrect": false
+                        },
+                        {
+                          "text": "pilihan D",
+                          "isCorrect": false
+                        }
+                      ],
+                     
+                    }
+                  ]
+                }`;
+
+                const result = await model.generateContent(prompt);
+                const responseText = result.response.text();
                 const jsonResponse = JSON.parse(responseText);
-                setResponse(jsonResponse);
+                setQuestion("response", jsonResponse.response);
                 console.log("Generated response:", jsonResponse);
             } catch (error) {
                 console.error("Error parsing JSON response:", error);
-                setResponse({ error: "Failed to parse response", raw: responseText });
+                setResponse({
+                    error: "Failed to parse response",
+                    raw: responseText,
+                });
             }
         } catch (error) {
             console.error("Generation error:", error);
@@ -168,37 +203,114 @@ const Esai = () => {
         }
     };
 
-    // Function to render the generated questions in a readable format
-    const renderQuestions = () => {
-        if (!response || !response.response) return <p>No questions generated yet.</p>;
-        
-        return (
-            <div className="space-y-6">
-                {response.response.map((item, index) => (
-                    <div key={index} className="border p-4 rounded-lg">
-                        <h3 className="font-bold mb-2">Soal {index + 1} ({item.type === "ESSAY" ? "Esai" : "Pilihan Ganda"})</h3>
-                        <p className="mb-2"><span className="font-medium">Pertanyaan:</span> {item.question}</p>
-                        
-                        {item.type === "MULTIPLE_CHOICE" && (
-                            <div className="mb-2">
-                                <div className="font-medium mb-1">Pilihan:</div>
-                                <ul className="list-disc ml-6">
-                                    {item.multipleChoice?.map((choice, choiceIndex) => (
-                                        <li key={choiceIndex} className={choice.isCorrect ? "text-green-600 font-medium" : ""}>
-                                            {choice.text} {choice.isCorrect && "(Jawaban Benar)"}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                        
-                        <div>
-                            <span className="font-medium">Jawaban:</span> {item.answer}
-                        </div>
-                    </div>
-                ))}
-            </div>
-        );
+    const reGenerate = async (index) => {
+        setLoadingRegenerate(index);
+        try {
+            let contents = {
+                subject: subject.find((e) => e.id === data.mapel).name,
+                classLevel: data.kelas,
+                educationLevel: "vocational high school",
+                language: "indonesia",
+                questionDifficultyLevel: data.kesulitan,
+            };
+
+            let responseSchema;
+            if (question.response[index].type === "ESSAY") {
+                responseSchema = {
+                    type: "object",
+                    properties: {
+                        question: {
+                            type: "string",
+                        },
+                        answer: {
+                            type: "string",
+                        },
+                    },
+                    required: ["question", "answer"],
+                };
+            } else {
+                contents = {
+                    ...contents,
+                    totalNumberOfMultipleChoice: 4,
+                };
+                responseSchema = {
+                    type: "object",
+                    properties: {
+                        question: {
+                            type: "string",
+                        },
+                        multipleChoice: {
+                            type: "array",
+                            items: {
+                                type: "object",
+                                properties: {
+                                    isCorrect: {
+                                        type: "boolean",
+                                    },
+                                    text: {
+                                        type: "string",
+                                    },
+                                },
+                                required: ["isCorrect", "text"],
+                            },
+                        },
+                    },
+                    required: ["question", "multipleChoice"],
+                };
+            }
+            const model = new GoogleGenAI({ apiKey: geminiApiKey });
+            const response = await model.models.generateContent({
+                model: "gemini-2.0-flash",
+                contents: JSON.stringify(contents),
+                config: {
+                    responseMimeType: "application/json",
+                    responseSchema: responseSchema,
+                },
+            });
+
+            const responseText = JSON.parse(response.text);
+            const temp = { ...question };
+            temp.response[index] = {
+                type: question.response[index].type,
+                ...responseText,
+            };
+            setQuestion(temp);
+        } catch (e) {
+            console.error(e);
+            alert("Gagal generate ulang");
+        }
+        setLoadingRegenerate(null);
+    };
+
+    const handleChangeQuestion = (value, index, type) => {
+        const temp = { ...question };
+        if (type === "QUESTION") {
+            temp.response[index].question = value;
+        } else {
+            temp.response[index].answer = value;
+        }
+        setQuestion(temp);
+    };
+
+    const handleChangeMultipleChoice = (value, index, indexChoice) => {
+        const temp = { ...question };
+        temp.response[index].multipleChoice[indexChoice].text = value;
+        setQuestion(temp);
+    };
+
+    const handleOnSaveQuestion = () => {
+        post(route("guru.generated-soal.store"), {
+            onSuccess: (props) => {
+                swal.fire({
+                    icon: "success",
+                    title: "Berhasil menambahkan soal",
+                    toast: true,
+                    position: "top-end",
+                    showConfirmButton: false,
+                    timer: 3000,
+                });
+            },
+        });
     };
 
     return (
@@ -309,21 +421,11 @@ const Esai = () => {
                                     <option value="" disabled selected>
                                         Pilih Mata Pelajaran
                                     </option>
-                                    <option value="ilmu pengetahuan alam">
-                                        Ilmu Pengetahuan Alam
-                                    </option>
-                                    <option value="bahasa indonesia">
-                                        Bahasa Indonesia
-                                    </option>
-                                    <option value="bahasa inggris">
-                                        Bahasa Inggris
-                                    </option>
-                                    <option value="matematika">
-                                        Matematika
-                                    </option>
-                                    <option value="pendidikan kewarganegaraan">
-                                        Pendidikan Kewarganegaraan
-                                    </option>
+                                    {subject.map((e, index) => (
+                                        <option key={index} value={e.id}>
+                                            {e.name}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
 
@@ -351,7 +453,7 @@ const Esai = () => {
                             </div>
 
                             {/* Difficulty Level */}
-                            <div className="mb-4.5">
+                            {/* <div className="mb-4.5">
                                 <label className="mb-3 block text-sm font-medium text-black dark:text-white">
                                     Tingkat Kesulitan
                                 </label>
@@ -362,10 +464,12 @@ const Esai = () => {
                                     name="kesulitan"
                                 >
                                     <option value="EASY">Mudah</option>
-                                    <option value="MEDIUM" selected>Sedang</option>
+                                    <option value="MEDIUM" selected>
+                                        Sedang
+                                    </option>
                                     <option value="HARD">Sulit</option>
                                 </select>
-                            </div>
+                            </div> */}
 
                             <button
                                 type="submit"
@@ -391,11 +495,199 @@ const Esai = () => {
                                 <div className="spinner" />
                                 <p className="mt-4">Generating questions...</p>
                             </div>
-                        ) : response ? (
+                        ) : question.response.length > 0 ? (
                             <>
-                                {renderQuestions()}
+                                <div className="space-y-6">
+                                    {question.response.map((item, index) => (
+                                        <div
+                                            key={index}
+                                            className="border p-4 rounded-lg"
+                                        >
+                                            <h3 className="font-bold mb-2">
+                                                <div className="flex justify-between items-center">
+                                                    <span>
+                                                        Soal {index + 1} (
+                                                        {item.type === "ESSAY"
+                                                            ? "Esai"
+                                                            : "Pilihan Ganda"}
+                                                        )
+                                                    </span>
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-circle btn-sm btn-ghost"
+                                                            onClick={() =>
+                                                                setEditQuestion(
+                                                                    (prev) =>
+                                                                        prev ===
+                                                                        index
+                                                                            ? null
+                                                                            : index
+                                                                )
+                                                            }
+                                                        >
+                                                            {editQuestion !=
+                                                            index ? (
+                                                                <FaPencilAlt />
+                                                            ) : (
+                                                                <FaCheck />
+                                                            )}
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-circle btn-sm btn-ghost"
+                                                            onClick={() =>
+                                                                reGenerate(
+                                                                    index
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                loadingRegenerate !=
+                                                                null
+                                                            }
+                                                        >
+                                                            {loadingRegenerate !=
+                                                            null ? (
+                                                                loadingRegenerate ===
+                                                                index ? (
+                                                                    <div className="loading"></div>
+                                                                ) : (
+                                                                    <RiAiGenerate2 />
+                                                                )
+                                                            ) : (
+                                                                <RiAiGenerate2 />
+                                                            )}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </h3>
+                                            <p className="mb-2">
+                                                <span className="font-medium">
+                                                    Pertanyaan:
+                                                </span>{" "}
+                                                {editQuestion != index ? (
+                                                    <span>{item.question}</span>
+                                                ) : (
+                                                    <input
+                                                        className="input input-sm input-bordered w-full"
+                                                        onChange={(e) =>
+                                                            handleChangeQuestion(
+                                                                e.currentTarget
+                                                                    .value,
+                                                                index,
+                                                                "QUESTION"
+                                                            )
+                                                        }
+                                                        defaultValue={
+                                                            item.question
+                                                        }
+                                                    />
+                                                )}
+                                            </p>
+
+                                            {item.type ===
+                                                "MULTIPLE_CHOICE" && (
+                                                <div className="mb-2">
+                                                    <div className="font-medium mb-1">
+                                                        Pilihan:
+                                                    </div>
+                                                    <ul className="list-disc ml-6">
+                                                        {item.multipleChoice?.map(
+                                                            (
+                                                                choice,
+                                                                choiceIndex
+                                                            ) => (
+                                                                <li
+                                                                    key={
+                                                                        choiceIndex
+                                                                    }
+                                                                    className={
+                                                                        choice.isCorrect
+                                                                            ? "text-green-600 font-medium"
+                                                                            : ""
+                                                                    }
+                                                                >
+                                                                    {editQuestion !=
+                                                                    index ? (
+                                                                        choice.text
+                                                                    ) : (
+                                                                        <input
+                                                                            className="input input-sm input-bordered w-full"
+                                                                            onChange={(
+                                                                                e
+                                                                            ) =>
+                                                                                handleChangeMultipleChoice(
+                                                                                    e
+                                                                                        .currentTarget
+                                                                                        .value,
+                                                                                    index,
+                                                                                    choiceIndex
+                                                                                )
+                                                                            }
+                                                                            defaultValue={
+                                                                                choice.text
+                                                                            }
+                                                                        />
+                                                                    )}{" "}
+                                                                    {choice.isCorrect &&
+                                                                        "(Jawaban Benar)"}
+                                                                </li>
+                                                            )
+                                                        )}
+                                                    </ul>
+                                                </div>
+                                            )}
+
+                                            {item.type === "ESSAY" ? (
+                                                <div>
+                                                    <span className="font-medium">
+                                                        Jawaban:
+                                                    </span>{" "}
+                                                    {editQuestion != index ? (
+                                                        <span>
+                                                            {item.answer}
+                                                        </span>
+                                                    ) : (
+                                                        <input
+                                                            className="input input-sm input-bordered w-full"
+                                                            onChange={(e) =>
+                                                                handleChangeQuestion(
+                                                                    e
+                                                                        .currentTarget
+                                                                        .value,
+                                                                    index,
+                                                                    "ANSWER"
+                                                                )
+                                                            }
+                                                            defaultValue={
+                                                                item.answer
+                                                            }
+                                                        />
+                                                    )}
+                                                </div>
+                                            ) : null}
+                                        </div>
+                                    ))}
+
+                                    <div className="flex justify-end">
+                                        <button
+                                            type="button"
+                                            className="btn btn-primary"
+                                            onClick={handleOnSaveQuestion}
+                                            disabled={processing}
+                                        >
+                                            {processing ? (
+                                                <div className="loading"></div>
+                                            ) : null}
+                                            <span>Simpan</span>
+                                        </button>
+                                    </div>
+                                </div>
+
                                 <div className="mt-6">
-                                    <h4 className="font-medium mb-2">Raw JSON Response:</h4>
+                                    <h4 className="font-medium mb-2">
+                                        Raw JSON Response:
+                                    </h4>
                                     <pre className="bg-gray-100 p-4 rounded overflow-auto  dark:bg-gray-800 dark:text-gray-200">
                                         {JSON.stringify(response, null, 2)}
                                     </pre>

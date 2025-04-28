@@ -8,27 +8,101 @@ use App\Models\Guru;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
-use App\Models\LapPemasukanCabang;
+use App\Models\UlanganJawaban;
+use App\Models\UlanganSetting;
+use App\Models\Question;
+use App\Models\QuestionInquiry;
+
 use App\Models\LapPengeluaranCabang;
 use Inertia\Response;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Log;
 
 
 
 
 class SiswaController extends Controller
 {
-    public function index(Request $request): Response
-    {
-  
+    public function index()
+{
+    $user = auth()->user();
+    $userPermissionIds = \Spatie\Permission\Models\Permission::whereIn('name', $user->getPermissionNames())->pluck('id');
+
+    $now = now();
+
+    $availableExams = UlanganSetting::with(['question.subject', 'question.teacher', 'permissions.permission'])
+        ->whereHas('permissions', function ($query) use ($userPermissionIds) {
+            $query->whereIn('permission_id', $userPermissionIds);
+        })
+        ->where('start_time', '<=', $now)
+        ->where('end_time', '>=', $now)
+        ->get();
 
 
 
-        return Inertia::render('Siswa/Index', [
+    return Inertia::render('Siswa/Index', [
+        'permissions' => $user->getPermissionNames(),
+        'available_exams' => $availableExams,
+    ]);
+}
 
-            'permissions' => Auth::user()->getPermissionNames(), // Kirim permission ke React
+public function showUjian(\App\Models\UlanganSetting $ulanganSetting)
+{
+    $ulanganSetting->load([
+        'question.subject',
+        'question.teacher',
+        'question.questionInquiries.multipleChoice'
+    ]);
+
+    return Inertia::render('Siswa/Ujian', [
+        'ulangan' => $ulanganSetting,
+    ]);
+}
 
 
+public function submitUjian(Request $request, \App\Models\UlanganSetting $ulanganSetting)
+{
+
+
+    logger()->info('User:', ['id' => auth()->id()]);
+    logger()->info('Data:', $request->all());
+ 
+
+
+    
+    $ulanganSetting->load(['question.questionInquiries']);
+    $ulanganSetting->load([
+        'question.questionInquiries.multipleChoice'
+    ]);
+    
+    
+    $request->validate([
+        'answers' => 'required|array',
+        'answers.*.question_inquiry_id' => 'required|exists:question_inquiries,id',
+        'answers.*.answer' => 'required|string',
+    ]);
+
+    foreach ($request->answers as $answer) {
+        logger()->info('Jawaban diproses:', $answer);
+
+            UlanganJawaban::create([
+            'user_id' => auth()->id(),
+            'ulangan_setting_id' => $ulanganSetting->id,
+            'question_id' => $ulanganSetting->question_id, // 
+            'question_inquiry_id' => $answer['question_inquiry_id'],
+            'answer' => $answer['answer'],
         ]);
     }
+
+
+    return redirect()->route('siswa.dashboard')->with('success', 'Ujian berhasil dikumpulkan!');
+}
+
+
+
+
+    
+    
+    
 }

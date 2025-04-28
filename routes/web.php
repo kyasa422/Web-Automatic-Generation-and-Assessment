@@ -124,40 +124,40 @@ Route::delete('/admin/userssiswa/{id}', [UserController::class, 'destroysiswa'])
 
 
 // Admin Controll Cabanggit
-    Route::get('/admin/cabangs', [CabangController::class, 'index'])
-        ->middleware(['auth', 'role:Admin'])
-        ->name('admin.cabangs');
-    Route::get('/admin/cabang/create', [CabangController::class, 'create'])
-        ->middleware(['auth', 'role:Admin'])
-        ->name('admin.cabangs.create');
+Route::get('/admin/cabangs', [CabangController::class, 'index'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.cabangs');
+Route::get('/admin/cabang/create', [CabangController::class, 'create'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.cabangs.create');
 
-    Route::post('/admin/cabang', [CabangController::class, 'store'])
-        ->middleware(['auth', 'role:Admin'])
-        ->name('admin.cabangs.store');
+Route::post('/admin/cabang', [CabangController::class, 'store'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.cabangs.store');
 
-    Route::get('/admin/cabang/{id}/edit', [CabangController::class, 'edit'])
-        ->middleware(['auth', 'role:Admin'])
-        ->name('admin.cabangs.edit');
-    Route::put('/admin/cabang/{id}', [CabangController::class, 'update'])
-        ->middleware(['auth', 'role:Admin'])
-        ->name('admin.cabangs.update');
-    Route::delete('/admin/cabang/{id}', [CabangController::class, 'destroy'])
-        ->middleware(['auth', 'role:Admin'])
-        ->name('admin.cabangs.destroy');
+Route::get('/admin/cabang/{id}/edit', [CabangController::class, 'edit'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.cabangs.edit');
+Route::put('/admin/cabang/{id}', [CabangController::class, 'update'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.cabangs.update');
+Route::delete('/admin/cabang/{id}', [CabangController::class, 'destroy'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.cabangs.destroy');
 
 
-    Route::get('/admin/mitra', [AdminController::class, 'mitra'])
-        ->middleware(['auth', 'role:Admin'])
-        ->name('admin.mitra');
-    Route::get('/admin/private', [AdminController::class, 'private'])
-        ->middleware(['auth', 'role:Admin'])
-        ->name('admin.private');
-    Route::get('/admin/guru', [AdminController::class, 'guru'])
-        ->middleware(['auth', 'role:Admin'])
-        ->name('admin.guru');
+Route::get('/admin/mitra', [AdminController::class, 'mitra'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.mitra');
+Route::get('/admin/private', [AdminController::class, 'private'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.private');
+Route::get('/admin/guru', [AdminController::class, 'guru'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.guru');
 
 Route::prefix('admin/laporan')->middleware(['auth', 'role:Admin|Guru'])->group(function () {
-                /* -----------------------------------------
+    /* -----------------------------------------
                             Laporan Cabang 
             -------------------------------------------- */
     Route::prefix('cabang')->group(function () {
@@ -168,7 +168,7 @@ Route::prefix('admin/laporan')->middleware(['auth', 'role:Admin|Guru'])->group(f
         Route::put('/{id}', [AdminController::class, 'updatelaporancabang'])->name('admin.laporan.cabang.update');
         Route::delete('/{id}', [AdminController::class, 'destroylaporancabang'])->name('admin.laporan.cabang.destroy');
     });
-            /* -----------------------------------------
+    /* -----------------------------------------
                             Pengeluaran Cabang 
             -------------------------------------------- */
     Route::prefix('pengeluaran')->group(function () {
@@ -179,10 +179,10 @@ Route::prefix('admin/laporan')->middleware(['auth', 'role:Admin|Guru'])->group(f
         Route::delete('/{id}', [AdminController::class, 'destroypengeluarancabang'])->name('admin.laporan.pengeluaran.cabang.destroy');
     });
 });
-            /* -----------------------------------------
+/* -----------------------------------------
                             Laporan Pemasukan Mitra 
             -------------------------------------------- */
-    Route::middleware(['auth', 'role:Admin|Mitra'])->group(function () {
+Route::middleware(['auth', 'role:Admin|Mitra'])->group(function () {
     Route::get('/admin/laporan/mitra', [AdminController::class, 'mitralaporan'])->name('admin.laporan.mitra');
     Route::get('/admin/laporan/mitra/create', [AdminController::class, 'createmitralaporan'])->name('admin.laporan.mitra.create');
     Route::post('/admin/laporan/mitra/store', [AdminController::class, 'storelaporanmitra'])->name('admin.laporan.mitra.store');
@@ -190,17 +190,17 @@ Route::prefix('admin/laporan')->middleware(['auth', 'role:Admin|Guru'])->group(f
     Route::put('/admin/laporan/mitra/{id}', [AdminController::class, 'updatelaporanmitra'])->name('admin.laporan.mitra.update');
     Route::delete('/admin/laporan/mitra/{id}', [AdminController::class, 'destroylaporanmitra'])->name('admin.laporan.mitra.destroy');
 });
-            /* -----------------------------------------
+/* -----------------------------------------
                             Laporan Pengeluaran Mitra 
             -------------------------------------------- */
-    Route::middleware(['auth', 'role:Admin|Mitra'])->group(function () {
+Route::middleware(['auth', 'role:Admin|Mitra'])->group(function () {
     Route::get('/admin/laporan/pengeluaranmitra/create', [AdminController::class, 'createpengeluaranmitralaporan'])->name('admin.laporan.pengeluaran.mitra.create');
     Route::post('/admin/laporan/pengeluaranmitra/store', [AdminController::class, 'storelaporanpengeluaranmitra'])->name('admin.laporan.pengeluaran.mitra.store');
     Route::get('/admin/laporan/pengeluaranmitra/{id}/edit', [AdminController::class, 'editpengeluaranmitra'])->name('admin.laporan.pengeluaran.mitra.show');
     Route::put('/admin/laporan/pengeluaranmitra/{id}', [AdminController::class, 'updatepengeluaranmitra'])->name('admin.laporan.pengeluaran.mitra.update');
     Route::delete('/admin/laporan/pengeluaranmitra/{id}', [AdminController::class, 'destroypengeluaranmitra'])->name('admin.laporan.pengeluaran.mitra.destroy');
 });
-            /* -----------------------------------------
+/* -----------------------------------------
                             Laporan Private 
             -------------------------------------------- */
 Route::prefix('admin/laporan')->middleware(['auth', 'role:Admin|Private'])->group(function () {
@@ -213,10 +213,10 @@ Route::prefix('admin/laporan')->middleware(['auth', 'role:Admin|Private'])->grou
         Route::put('/{id}', [AdminController::class, 'updatelaporanprivate'])->name('admin.laporan.private.update');
         Route::delete('/{id}', [AdminController::class, 'destroylaporanprivate'])->name('admin.laporan.private.destroy');
     });
-            /* -----------------------------------------
+    /* -----------------------------------------
                             Pengeluaran Private 
-            -------------------------------------------- */    
-        Route::prefix('pengeluaranprivate')->group(function () {
+            -------------------------------------------- */
+    Route::prefix('pengeluaranprivate')->group(function () {
         Route::get('/create', [AdminController::class, 'createpengeluaranprivatelaporan'])->name('admin.laporan.pengeluaran.private.create');
         Route::post('/store', [AdminController::class, 'storelaporanpengeluaranprivate'])->name('admin.laporan.pengeluaran.private.store');
         Route::get('/{id}/edit', [AdminController::class, 'editpengeluaranprivate'])->name('admin.laporan.pengeluaran.private.edit');
@@ -224,7 +224,7 @@ Route::prefix('admin/laporan')->middleware(['auth', 'role:Admin|Private'])->grou
         Route::delete('/{id}', [AdminController::class, 'destroypengeluaranprivate'])->name('admin.laporan.pengeluaran.private.destroy');
     });
 });
-            /* -----------------------------------------
+/* -----------------------------------------
                 Rekap Bulanan 
             -------------------------------------------- */
 Route::prefix('rekap')->middleware(['auth', 'role:Admin'])->group(function () {
@@ -241,8 +241,10 @@ Route::get('/guru/generated-soal', [GuruController::class, 'generatesoal'])
 
 Route::get('/guru/generated-soal/create', [GuruController::class, 'soalesai'])
     ->middleware(['auth', 'role:Guru'])
-    ->name('guru.generated-soal.create');   
-            /* -----------------------------------------
+    ->name('guru.generated-soal.create');
+
+Route::post('/guru/generated-soal', [GuruController::class, 'store'])->middleware(['auth', 'role:Guru'])->name('guru.generated-soal.store');
+/* -----------------------------------------
                             Settings 
             -------------------------------------------- */
 Route::get('/admin/settings', [AdminController::class, 'settings'])
@@ -263,16 +265,19 @@ Route::get('/private/settings', [AdminController::class, 'settings'])
 Route::patch('/admin/settings', [AdminController::class, 'update'])
     ->middleware(['auth', 'role:Admin|Guru|Private|Mitra'])
     ->name('admin.settings.update');
+    
 
-            /* -----------------------------------------
+/* -----------------------------------------
                             dashboard role 
             -------------------------------------------- */
+
+
 Route::get('guru/dashboard', [GuruController::class, 'index'])
     ->middleware(['auth', 'role:Guru'])
     ->name('guru.dashboard');
 
 // Route untuk Siswa
-Route::get('/siswa/dashboard', [SiswaController::class, 'index']) 
+Route::get('/siswa/dashboard', [SiswaController::class, 'index'])
     ->middleware(['auth', 'role:Siswa'])
     ->name('siswa.dashboard');
 
@@ -287,7 +292,7 @@ Route::get('/mitra/dashboard', [MitraController::class, 'index'])
 Route::get('/admin/dashboard', function () {
     return Inertia::render('Admin/Dashboard');
 })->middleware(['auth', 'role:Admin'])->name('admin.dashboard');
-    
+
 Route::get('/admin/dashboard', [AdminController::class, 'index'])
     ->middleware(['auth', 'role:Admin'])
     ->name('admin.dashboard');
@@ -307,6 +312,48 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('Laporan/LaporanPage');
     });
 });
+
+
+// Admin
+Route::get('/admin/subject', [AdminController::class, 'subject'])->name('admin.subject')
+    ->middleware(['auth', 'role:Admin']);
+Route::post('/admin/subject/store', [AdminController::class, 'createSubject'])->name('admin.subject.store')
+    ->middleware(['auth', 'role:Admin']);
+
+Route::post('/admin/subject/{id}/update', [AdminController::class, 'updateSubject'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.subject.update');
+Route::delete('/admin/subject/{id}', [AdminController::class, 'deleteSubject'])
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.subject.destroy');
+
+
+route::get('/admin/subject/create', [AdminController::class, 'createSubject'])->name('admin.subject.create')
+    ->middleware(['auth', 'role:Admin']);
+
+// Guru 
+Route::get('/banksoal/{id}', [GuruController::class, 'show'])->name('banksoal.show')
+->middleware(['auth','role:Guru']);
+
+Route::post('/guru/set-ulangan', [GuruController::class, 'setUlangan'])
+->middleware(['auth','role:Guru']);
+Route::get('/guru/rekapsoal', [GuruController::class, 'rekapsoal'])->name('guru.rekapsoal')
+->middleware(['auth','role:Guru']);
+
+Route::get('/guru/rekap/{question}', [GuruController::class, 'showsiswa'])->name('guru.rekap.showsiswa')
+->middleware(['auth','role:Guru']);
+Route::get('/guru/rekapsoal/{ulanganSettings}/{userId}', [GuruController::class, 'detailJawaban'])->name('guru.rekapsoal.show')
+->middleware(['auth','role:Guru']);
+
+
+
+
+//Siswa
+Route::middleware(['auth', 'role:Siswa'])->group(function () {
+    Route::get('/siswa/ujian/{ulanganSetting}', [SiswaController::class, 'showUjian'])->name('siswa.ujian');
+    Route::post('/siswa/ujian/{ulanganSetting}', [SiswaController::class, 'submitUjian'])->name('siswa.ujian.submit');
+});
+// Route::get('/siswa/ujian/{ulanganSetting}/result', [SiswaController::class, 'showResult'])->name('siswa.ujian.result'); 
 
 
 Route::get('/', function () {
