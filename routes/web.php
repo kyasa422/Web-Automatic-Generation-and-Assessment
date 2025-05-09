@@ -234,16 +234,7 @@ Route::prefix('rekap')->middleware(['auth', 'role:Admin'])->group(function () {
 });
 
 
-// Generate Soal Guru
-Route::get('/guru/generated-soal', [GuruController::class, 'generatesoal'])
-    ->middleware(['auth', 'role:Guru'])
-    ->name('guru.generatesoal');
 
-Route::get('/guru/generated-soal/create', [GuruController::class, 'soalesai'])
-    ->middleware(['auth', 'role:Guru'])
-    ->name('guru.generated-soal.create');
-
-Route::post('/guru/generated-soal', [GuruController::class, 'store'])->middleware(['auth', 'role:Guru'])->name('guru.generated-soal.store');
 /* -----------------------------------------
                             Settings 
             -------------------------------------------- */
@@ -332,7 +323,23 @@ route::get('/admin/subject/create', [AdminController::class, 'createSubject'])->
     ->middleware(['auth', 'role:Admin']);
 
 // Guru 
+
+// Generate Soal Guru
+Route::get('/guru/generated-soal', [GuruController::class, 'generatesoal'])
+    ->middleware(['auth', 'role:Guru'])
+    ->name('guru.generatesoal');
+
+Route::get('/guru/generated-soal/create', [GuruController::class, 'soalesai'])
+    ->middleware(['auth', 'role:Guru'])
+    ->name('guru.generated-soal.create');
+
+Route::post('/guru/generated-soal', [GuruController::class, 'store'])->middleware(['auth', 'role:Guru'])->name('guru.generated-soal.store');
+
+
 Route::get('/banksoal/{id}', [GuruController::class, 'show'])->name('banksoal.show')
+->middleware(['auth','role:Guru']);
+
+Route::delete('/banksoal/{id}', [GuruController::class, 'delete'])->name('banksoal.delete')
 ->middleware(['auth','role:Guru']);
 
 Route::post('/guru/set-ulangan', [GuruController::class, 'setUlangan'])
@@ -345,7 +352,8 @@ Route::get('/guru/rekap/{question}', [GuruController::class, 'showsiswa'])->name
 Route::get('/guru/rekapsoal/{ulanganSettings}/{userId}', [GuruController::class, 'detailJawaban'])->name('guru.rekapsoal.show')
 ->middleware(['auth','role:Guru']);
 
-
+Route::post('/assessments/store', [GuruController::class, 'storenilaisiswa'])->name('assessments.store')
+->middleware(['auth','role:Guru']);
 
 
 //Siswa

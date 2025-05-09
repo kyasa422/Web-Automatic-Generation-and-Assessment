@@ -1,6 +1,61 @@
 import React from "react";
 import { usePage, Link } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
+import { FaEdit, FaTrash } from 'react-icons/fa';
+
+import SweetAlert from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+import { router } from "@inertiajs/react";
+import axios from "axios";
+import swal from "sweetalert2";
+
+const handleDelete = (id) => {
+  swal.fire({
+    title: "Yakin ingin menghapus soal ini?",
+    text: "Tindakan ini tidak dapat dibatalkan!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Ya, hapus!",
+    cancelButtonText: "Batal",
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        await axios.delete(route("banksoal.delete", id));
+        swal.fire({
+          icon: "success",
+          title: "Berhasil",
+          text: "Soal berhasil dihapus",
+          toast: true,
+          timer: 2000,
+          position: "top-end",
+          showConfirmButton: false,
+        });
+
+        // Refresh halaman (opsional)
+        window.location.reload();
+      } catch (error) {
+        if (error.response && error.response.status === 403) {
+          swal.fire({
+            icon: "error",
+            title: "Akses Ditolak",
+            text: "Anda tidak memiliki izin untuk menghapus soal ini. hanya user yang membuat soal yang dapat menghapus soal ini.",
+          });
+        } else {
+          swal.fire({
+            icon: "error",
+            title: "Gagal",
+            text: "Terjadi kesalahan saat menghapus soal.",
+          });
+        }
+      }
+    }
+  });
+};
+
+
+
 
 const BankSoal = () => {
   const { questions } = usePage().props;
@@ -39,8 +94,28 @@ const BankSoal = () => {
                       href={route("banksoal.show", q.id)}
                       className="inline-block text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
                     >
+                                        <span className="inline-flex items-center space-x-1 ">
+
+                                        <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer mr-1" />
+                    
                       Detail
+                                        </span>
                     </Link>
+
+
+                    <button
+                    onClick={() => handleDelete(q.id)}
+                    className="inline-block text-sm bg-slate-700 text-gray-100 px-3 py-1 rounded hover:bg-red-700 transition ml-3"
+                  >
+                    <span className="inline-flex items-center space-x-1">
+                      <FaTrash className="text-red-500 hover:text-slate-100" />
+                      <span>Delete</span>
+                    </span>
+                  </button>
+
+
+      
+                 
                   </td>
                 </tr>
               ))}

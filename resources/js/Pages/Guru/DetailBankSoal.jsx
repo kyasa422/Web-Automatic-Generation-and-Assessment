@@ -66,9 +66,11 @@ const DetailBankSoal = () => {
 
               {inq.answer?.trim() && (
                 <p className="mt-2 text-sm text-black-2">
-                  Jawaban Benar :<br /> {inq.answer}
+                  Jawaban  :<br /> {inq.answer}
                 </p>
               )}
+
+              <p> bobot : {inq.bobot}  </p>
 
               <ul className="list-disc pl-6 mt-2">
                 {inq.multiple_choice.map((mc) => (

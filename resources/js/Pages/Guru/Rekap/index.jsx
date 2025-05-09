@@ -5,7 +5,7 @@ import DefaultLayout from "@/Layouts/DefaultLayout";
 
 const Rekap = () => {
   const { questions, examSettings } = usePage().props;
-  console.log(questions);
+  console.log(examSettings);
 
   const getStatusUlangan = (startTime, endTime) => {
     const now = new Date();
@@ -39,15 +39,17 @@ const Rekap = () => {
                   </h1>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {examSettings.map((item, i) => (
+                  {examSettings!=null? examSettings.map((item, i) => (
                       <div
                         key={i}
                         className="bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-lg transition-shadow p-6"
                       >
                         <div className="mb-2">
                           <h2 className="text-xl font-semibold text-blue-800">
-                            {item.question.subject.name} <span className="text-gray-500 text-sm">( {item.created_at.toString().slice(0, 10)}
-                          )</span>
+                            {item.question.subject.name?? ""} 
+                            <span className="text-gray-500 text-sm">( {item.created_at.toString().slice(0, 10)}
+                          )
+                          </span>
                           </h2>
                           <p>
                         <span className="font-medium">Status Ujian:</span>{" "}
@@ -90,7 +92,7 @@ const Rekap = () => {
                           </Link>
                         </div>
                       </div>
-                        ))}
+                        )): <p> belum ada data  </p>}
                       </div>
                     </div>
              

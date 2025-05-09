@@ -18,7 +18,7 @@ class UlanganSetting extends Model
 
     public function question()
     {
-        return $this->belongsTo(Question::class);
+        return $this->belongsTo(Question::class, 'question_id', 'id');
     }
 
 // App\Models\UlanganSetting.php
@@ -35,5 +35,7 @@ public function ulanganJawabanMany(){
 public function ulanganJawabanHasOne(){
     return $this->hasOne(UlanganJawaban::class, "ulangan_setting_id", "id"); 
 }
+
+
 
 }

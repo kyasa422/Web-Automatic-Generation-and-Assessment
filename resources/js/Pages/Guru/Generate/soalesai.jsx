@@ -41,6 +41,17 @@ const Esai = () => {
         subjectId: "",
         examLevel: false,
     });
+    const [editBobot, setEditBobot] = useState(null);
+    const [totalBobot, setTotalBobot] = useState(0);
+    React.useEffect(() => {
+        const total = question.response.reduce((sum, q) => {
+            return sum + parseFloat(q.bobot || 0);
+        }, 0);
+        setTotalBobot(total);
+    }, [question.response]);
+    
+
+
 
     function handleChange(e) {
         const { name, value } = e.target;
@@ -149,13 +160,15 @@ const Esai = () => {
                 Generate untuk soal esai dulu baru soal multiplechoice.
                 Jumlah soal esai adalah ${data.jumlahSoalEsai} dan 
                 Jumlah soal pilihan ganda ${data.jumlahSoalPG}.
+                Pastikan total bobot seluruh (essay dan multiple_choice) berjumlah harus 100 tidak kurang dan tidak lebih, dan setiap soal harus memiliki bobot lebih dari 0.
                 Format JSON sesuai dengan schema berikut:
                 {
                   "response": [
                     {
                       "type": "ESSAY",
                       "question": "pertanyaan esai...",
-                      "answer": "jawaban esai..."
+                      "answer": "jawaban esai...",
+                        "bobot": ""
                     },
                     {
                       "type": "MULTIPLE_CHOICE",
@@ -178,8 +191,10 @@ const Esai = () => {
                           "isCorrect": false
                         }
                       ],
+                        "bobot": ""
                      
-                    }
+                    },
+                    
                   ]
                 }`;
 
@@ -188,6 +203,7 @@ const Esai = () => {
                 const jsonResponse = JSON.parse(responseText);
                 setQuestion("response", jsonResponse.response);
                 console.log("Generated response:", jsonResponse);
+
             } catch (error) {
                 console.error("Error parsing JSON response:", error);
                 setResponse({
@@ -284,13 +300,39 @@ const Esai = () => {
 
     const handleChangeQuestion = (value, index, type) => {
         const temp = { ...question };
+    
         if (type === "QUESTION") {
             temp.response[index].question = value;
-        } else {
+        } else if (type === "ANSWER") {
             temp.response[index].answer = value;
+        } else if (type === "BOBOT") {
+            const newBobot = parseFloat(value || 0);
+    
+            // Hitung total tanpa bobot lama di index ini
+            const currentTotal = temp.response.reduce((sum, q, i) => {
+                if (i === index) return sum;
+                return sum + parseFloat(q.bobot || 0);
+            }, 0);
+    
+            if (currentTotal + newBobot > 100) {
+                swal.fire({
+                    icon: "error",
+                    title: "Total bobot melebihi 100",
+                    text: `Bobot saat ini: ${currentTotal}, bobot baru akan menjadi: ${currentTotal + newBobot}`,
+                });
+                return;
+            }
+    
+            temp.response[index].bobot = newBobot;
         }
+    
+        // Hitung ulang total bobot
+        const newTotal = temp.response.reduce((sum, q) => sum + parseFloat(q.bobot || 0), 0);
+        setTotalBobot(newTotal);
+    
         setQuestion(temp);
     };
+    
 
     const handleChangeMultipleChoice = (value, index, indexChoice) => {
         const temp = { ...question };
@@ -299,8 +341,25 @@ const Esai = () => {
     };
 
     const handleOnSaveQuestion = () => {
+        const totalBobot = question.response.reduce((sum, q) => {
+            return sum + parseFloat(q.bobot || 0);
+        }, 0);
+    
+        if (totalBobot !== 100) {
+            swal.fire({
+                icon: "error",
+                title: "Total bobot harus tepat 100!",
+                text: `Saat ini total bobot adalah ${totalBobot}. Mohon sesuaikan.`,
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 4000,
+            });
+            return; // Jangan submit
+        }
+    
         post(route("guru.generated-soal.store"), {
-            onSuccess: (props) => {
+            onSuccess: () => {
                 swal.fire({
                     icon: "success",
                     title: "Berhasil menambahkan soal",
@@ -312,6 +371,7 @@ const Esai = () => {
             },
         });
     };
+    
 
     return (
         <DefaultLayout>
@@ -486,7 +546,20 @@ const Esai = () => {
                 <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
                     <div className="border-b border-stroke px-6.5 py-4 dark:border-strokedark">
                         <h3 className="font-medium text-black dark:text-white">
-                            Hasil Generate Soal
+                            Hasil Generate Soal 
+                            <div className="mb-4 text-right">
+                            <strong>Total Bobot: </strong>
+                            <span
+                                style={{
+                                    color: totalBobot > 100 ? 'red' : totalBobot === 100 ? 'green' : 'orange',
+                                }}
+                            >
+                                {totalBobot}
+                            </span>
+                            / 100
+                          </div>
+
+
                         </h3>
                     </div>
                     <div className="p-6.5">
@@ -503,6 +576,9 @@ const Esai = () => {
                                             key={index}
                                             className="border p-4 rounded-lg"
                                         >
+                                        
+                    
+
                                             <h3 className="font-bold mb-2">
                                                 <div className="flex justify-between items-center">
                                                     <span>
@@ -558,6 +634,36 @@ const Esai = () => {
                                                                 <RiAiGenerate2 />
                                                             )}
                                                         </button>
+                                                        <div className="mb-2 flex items-center justify-between">
+    <span className="font-medium">Bobot:</span>
+    <div className="flex gap-2 items-center">
+        {editBobot !== index ? (
+            <span>{item.bobot ?? 1}</span>
+        ) : (
+            <input
+                type="number"
+                min="1"
+                className="input input-sm input-bordered w-24"
+                onChange={(e) =>
+                    handleChangeQuestion(e.currentTarget.value, index, "BOBOT")
+                }
+                defaultValue={item.bobot ?? 1}
+            />
+        )}
+
+        <button
+            type="button"
+            className="btn btn-circle btn-sm btn-ghost"
+            onClick={() =>
+                setEditBobot((prev) => (prev === index ? null : index))
+            }
+        >
+            {editBobot !== index ? <FaPencilAlt /> : <FaCheck />}
+        </button>
+    </div>
+</div>
+
+
                                                     </div>
                                                 </div>
                                             </h3>

@@ -6,6 +6,8 @@ import { FaCheck, FaPencilAlt } from "react-icons/fa";
 import moment from "moment";
 import { CheckCircle, XCircle } from 'lucide-react'; // lucide-react icon, ringan dan modern
 import { Stars, TrendingUp } from 'lucide-react'; // pakai icon Stars, mirip Gemini, modern
+import Swal from "sweetalert2";
+
 
 
 
@@ -13,18 +15,35 @@ const DetailJawaban = () => {
   const {  ulanganSettings } = usePage().props;
   const [isLoading, setIsLoading] = useState(null)
   const [edit, setEdit] = useState(null)
-  const { data, setData, errors, processing } = useForm({
+  const [score, setScore] = useState(null)
+  const { data, setData, errors, processing, post } = useForm({
+    nilai: null,
+    ulangan_setting_id: ulanganSettings.id,
+    user_id: ulanganSettings.ulangan_jawaban_has_one.user.id, // asumsi dari props
     detail: ulanganSettings.ulangan_jawaban_many.map(e => ({
       questionId: e.question_inquiry_id,
       question: e.question_inquiry.question,
       answer: e.question_inquiry.answer,
       studentAnswer: e.answer,
+      bobot: e.question_inquiry.bobot, // <-- Tambahkan ini
       multipleChoice: e.question_inquiry.multiple_choice,
       isCorrect: null,
       note: null,
       score: null
     }))
   })
+
+  console.log(ulanganSettings)
+
+  const totalScore = data.detail.reduce(
+    (sum, item) => sum + (item.score !== null ? item.score * item.bobot : 0),
+    0
+  );
+  
+  const maxScore = data.detail.reduce((sum, item) => sum + (item.bobot ?? 1), 0);
+  
+
+  // console.log(ulanganSettings)
 
   const correctWithGemini = async () => {
     setIsLoading("CORRECT_GEMINI")
@@ -36,6 +55,7 @@ const DetailJawaban = () => {
         correctAnswer: e.answer,
         studentAnswer: e.studentAnswer
       }))
+  
 
       const schema = {
         "type": "object",
@@ -70,10 +90,12 @@ const DetailJawaban = () => {
             }
           }
         }
-      }
+      } 
 
       const response = await model.models.generateContent({
         model: "gemini-2.0-flash",
+        // model: "gemini-2.5-pro-exp-03-25",
+
         contents: JSON.stringify(contents),
         config: {
           responseMimeType: "application/json",
@@ -86,14 +108,20 @@ const DetailJawaban = () => {
       jsonParse.response.map(e => {
         const index = temp.findIndex(a => a.questionId === e.question_id)
         if(index > -1){
+          const bobot = temp[index].bobot ?? 1; // default ke 1 jika tidak ada
           temp[index].isCorrect = e.isCorrect
         temp[index].score = e.score
         temp[index].note = e.note
+        temp[index].finalScore = e.score * bobot; // <-- HITUNG FINAL SCORE DI SINI
+        const totalScore = data.detail.reduce((sum, item) => sum + (item.finalScore ?? 0), 0)
+
         }
+
 
       })
 
-      setData({ detail: temp })
+      setData(prev => ({ ...prev, detail: temp }))
+      console.log(jsonParse.response)
     }catch(e){
       console.error(e)
       alert('Ada kesalahan pada server!')
@@ -105,14 +133,68 @@ const DetailJawaban = () => {
   const changeCorrect = (index, correct) => {
     const temp = [...data.detail]
     temp[index].isCorrect = correct
-    setData({ detail: temp })
+    setData(prev => ({ ...prev, detail: temp }))
   }
 
   const changeNote = (index, note) => {
     const temp = [...data.detail]
     temp[index].note = note
-    setData({ detail: temp })
+    setData(prev => ({ ...prev, detail: temp }))
   }
+
+  const changeScore = (index, newScore) => {
+    const temp = [...data.detail];
+    const bobot = temp[index].bobot ?? 1;
+    const scoreVal = parseFloat(newScore);
+  
+    // Update score dan finalScore
+    temp[index].score = scoreVal;
+    temp[index].finalScore = scoreVal * bobot;
+  
+    // Update isCorrect otomatis jika skor lebih dari 0.5
+    temp[index].isCorrect = scoreVal > 0.5;
+  
+    setData(prev => ({ ...prev, detail: temp }))
+  };
+
+  const submitAssessment = () => {
+    setIsLoading("SUBMIT");
+  
+    const timeout = setTimeout(() => {
+      setIsLoading(null);
+      Swal.fire({
+        icon: "error",
+        title: "Gagal",
+        text: "Gagal menyimpan penilaian! Waktu habis (10 detik). Silakan coba lagi.",
+      });
+    }, 10000);
+  
+    post(route("assessments.store"), {
+      onSuccess: () => {
+        clearTimeout(timeout);
+        setIsLoading(null);
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil",
+          text: "Penilaian berhasil disimpan!",
+        });
+      },
+      onError: (errors) => {
+        clearTimeout(timeout);
+        setIsLoading(null);
+        console.error(errors);
+        Swal.fire({
+          icon: "error",
+          title: "Gagal",
+          text: "Gagal menyimpan penilaian!",
+        });
+      }
+    });
+  };
+  
+  
+  
+  
 
   return (
     <DefaultLayout>
@@ -135,32 +217,32 @@ const DetailJawaban = () => {
               <p className="font-semibold mb-1">Nilai Otomatis:</p>
               <div className="mt-2 flex flex-col gap-2">
               <button
-    className="btn btn-sm btn-outline"
-    style={{ borderColor: "#5C6BC0", color: "#5C6BC0" }} // warna biru-ungu Gemini
-    disabled={isLoading != null}
-    onClick={correctWithGemini}
-  >
-    {isLoading === "CORRECT_GEMINI" ? (
-      <span className="loading loading-spinner loading-xs mr-2"></span>
-    ) : (
-      <Stars className="w-4 h-4 mr-2" />
-    )}
-    <span>Koreksi soal menggunakan Gemini</span>
-  </button>
- {/* Tombol Cosine Similarity */}
- <button
-    className="btn btn-sm btn-outline"
-    style={{ borderColor: "#00ACC1", color: "#00ACC1" }} 
+              className="btn btn-sm btn-outline"
+              style={{ borderColor: "#5C6BC0", color: "#5C6BC0" }} // warna biru-ungu Gemini
+              disabled={isLoading != null}
+              onClick={correctWithGemini}
+            >
+              {isLoading === "CORRECT_GEMINI" ? (
+                <span className="loading loading-spinner loading-xs mr-2"></span>
+              ) : (
+                <Stars className="w-4 h-4 mr-2" />
+              )}
+              <span>Koreksi soal menggunakan Gemini</span>
+            </button>
+          {/* Tombol Cosine Similarity */}
+          <button
+              className="btn btn-sm btn-outline"
+              style={{ borderColor: "#00ACC1", color: "#00ACC1" }} 
 
-    >
+              >
           <TrendingUp className="w-4 h-4 mr-2" />
 
     
 
     
 
-    <span>Koreksi soal menggunakan cosine similarity</span>
-  </button>
+              <span>Koreksi soal menggunakan cosine similarity</span>
+            </button>
                 </div>
             </div>
           </div>
@@ -171,84 +253,239 @@ const DetailJawaban = () => {
 
         {data.detail.length > 0 ? (
           data.detail.map((item, index) => (
-            <div key={index} className="bg-white border border-gray-200 rounded-lg shadow-md p-6 mb-5">
-            <div className="flex justify-between items-center">
-              <h2 className="font-semibold mb-2 ">Soal {index + 1} : { item.isCorrect }</h2>
-              <div className="flex items-center gap-2">
-              <div className="flex items-center gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name={`multiple-${index}`}
-                  className="hidden"
-                  checked={item.isCorrect === true}
-                  onChange={() => changeCorrect(index, true)}
-                />
-                <div className={`flex items-center gap-1 px-3 py-1 rounded-full border ${item.isCorrect === true ? 'bg-green-100 border-green-500 text-green-700' : 'border-gray-300 text-gray-500'}`}>
-                  <CheckCircle className="w-5 h-5" />
-                </div>
-              </label>
+            <div key={index} className="bg-white border border-gray-200 rounded-2xl shadow-md p-6 mb-6 space-y-4">
+  {/* Header */}
+  <div className="flex justify-between flex-wrap gap-4 items-center bg-sky-100 text-sky-800 px-5 py-3 rounded-xl">
+    <div>
+      <h2 className="font-semibold text-lg">Soal {index + 1}</h2>
+      <p className="text-sm">Bobot: <span className="font-semibold">{item.bobot}</span></p>
+    </div>
+    <div className="text-left">
+  <div className="flex items-center gap-2 text-sm">
+    <span>Skor Gemini:</span>
+    {score === index ? (
+      <input
+        type="number"
+        step="0.01"
+        min={0}
+        max={1}
+        className="input input-sm border rounded w-20 text-right"
+        defaultValue={item.score ?? 0}
+        onBlur={(e) => {
+  const value = parseFloat(e.target.value);
+  if (isNaN(value) || value < 0 || value > 1) {
+    Swal.fire({
+      icon: "error",
+      title: "Skor tidak valid",
+      text: "Masukkan nilai antara 0 dan 1.",
+    });
+    e.target.value = item.score ?? 0;
+    return;
+  }
+  changeScore(index, value);
+  setScore(null);
+}}
 
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name={`multiple-${index}`}
-                  className="hidden"
-                  checked={item.isCorrect === false}
-                  onChange={() => changeCorrect(index, false)}
-                />
-                <div className={`flex items-center gap-1 px-3 py-1 rounded-full border ${item.isCorrect === false ? 'bg-red-100 border-red-500 text-red-700' : 'border-gray-300 text-gray-500'}`}>
-                  <XCircle className="w-5 h-5" />
-                </div>
-              </label>
-            </div>
-              </div>
-            </div>
+      />
+    ) : (
+      <span className="font-semibold">
+        {item.score !== null ? item.score.toFixed(2) : 'Belum ada'}
+      </span>
+    )}
 
-              <div className="mb-2">
-                <p className="text-gray-700">  <strong> 
-                Pertanyaan:</strong> <br></br> {item.question}</p>
-              </div>
-              <div className="mb-2">
-                <strong>Jawaban Siswa:</strong> <br></br> {item.studentAnswer}
-              </div>
-              <div>
-                <strong>{ item.multipleChoice.length === 0 ? "Kunci Jawaban Essay:" : "Kunci Jawaban pg:" }</strong>
-                <ul className="list-disc pl-5">
-                {item.answer}
+    <button
+      className="btn btn-sm btn-ghost hover:bg-gray-100 rounded-full"
+      onClick={() => setScore(score === index ? null : index)}
+    >
+      {score === index ? <FaCheck /> : <FaPencilAlt />}
+    </button>
+  </div>
 
-                  {item.multipleChoice.map((choice, i) => (
-                    <li key={i} className={choice.isCorrect ? "text-green-600 font-semibold" : ""}>
-                      {choice.text} {choice.isCorrect ? "(Benar)" : ""}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              {
-                item.note && item.multipleChoice.length === 0 ? <div className="mt-4 flex justify-between items-center">
-                  {
-                    edit === index ? <textarea className="textarea textarea-bordered w-full" defaultValue={item.note} onChange={e => changeNote(index, e.currentTarget.value)} /> : <section>
-                  <strong>Catatan:</strong>
-                  <p className="text-gray-700">{item.note}</p>
-                  </section>
-                  }
-                  <button className="btn btn-circle btn-sm btn-ghost" onClick={() => setEdit(edit === index ? null : index)}>
-                  {
-                    edit === index ? <FaCheck /> : <FaPencilAlt />
-                  }
-                  </button>
-                </div> : null
-              }
-            </div>
+  <p className="text-sm mt-1">
+    Nilai:
+    <span className="font-semibold ml-1">
+      {item.score !== null ? (item.bobot * item.score).toFixed(2) : 'Belum ada'}
+    </span>
+  </p>
+</div>
+
+
+
+    {/* Penilaian Manual */}
+    <div className="flex items-center gap-4">
+      <label className="flex items-center gap-2 cursor-pointer">
+        <input
+          type="radio"
+          name={`multiple-${index}`}
+          className="hidden"
+          checked={item.isCorrect === true}
+          onChange={() => changeCorrect(index, true)}
+        />
+        <div className={`flex items-center gap-1 px-3 py-1 rounded-full border text-sm transition ${
+          item.isCorrect === true
+            ? 'bg-green-100 border-green-500 text-green-700'
+            : 'border-gray-300 text-gray-500'
+        }`}>
+          <CheckCircle className="w-4 h-4" />
+          Benar
+        </div>
+      </label>
+
+      <label className="flex items-center gap-2 cursor-pointer">
+        <input
+          type="radio"
+          name={`multiple-${index}`}
+          className="hidden"
+          checked={item.isCorrect === false}
+          onChange={() => changeCorrect(index, false)}
+        />
+        <div className={`flex items-center gap-1 px-3 py-1 rounded-full border text-sm transition ${
+          item.isCorrect === false
+            ? 'bg-red-100 border-red-500 text-red-700'
+            : 'border-gray-300 text-gray-500'
+        }`}>
+          <XCircle className="w-4 h-4" />
+          Salah
+        </div>
+      </label>
+    </div>
+  </div>
+
+  {/* Pertanyaan */}
+  <div>
+    <p className="text-gray-800"><strong>Pertanyaan:</strong></p>
+    <p className="text-gray-700">{item.question}</p>
+  </div>
+
+  {/* Jawaban Siswa */}
+  <div>
+    <p className="text-gray-800"><strong>Jawaban Siswa:</strong></p>
+    <p className="text-gray-700">{item.studentAnswer}</p>
+  </div>
+
+  {/* Kunci Jawaban */}
+  <div>
+    <p className="text-gray-800 font-semibold">
+      {item.multipleChoice.length === 0 ? "Kunci Jawaban Essay:" : "Kunci Jawaban PG:"}
+    </p>
+    <ul className="list-disc pl-5 text-gray-700">
+      {item.answer && typeof item.answer === 'string' && (
+        <li>{item.answer}</li>
+      )}
+      {item.multipleChoice.map((choice, i) => (
+        <li key={i} className={choice.isCorrect ? "text-green-600 font-semibold" : ""}>
+          {choice.text} {choice.isCorrect ? "(Benar)" : ""}
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  {/* Catatan */}
+  {item.note && item.multipleChoice.length === 0 && (
+    <div className="mt-2 flex justify-between items-start gap-4">
+      {edit === index ? (
+        <textarea
+          className="textarea textarea-bordered w-full rounded-md border border-gray-300 p-2 text-gray-700"
+          defaultValue={item.note}
+          onChange={e => changeNote(index, e.currentTarget.value)}
+        />
+      ) : (
+        <div>
+          <strong className="text-gray-800">Catatan:</strong>
+          <p className="text-gray-700">{item.note}</p>
+        </div>
+      )}
+
+      <button
+        className="btn btn-sm btn-ghost hover:bg-gray-100 rounded-full"
+        onClick={() => setEdit(edit === index ? null : index)}
+      >
+        {edit === index ? <FaCheck /> : <FaPencilAlt />}
+      </button>
+    </div>
+  )}
+
+
+</div>
           ))
         ) : (
             <p className="text-red-500 text-center">Tidak ada data jawaban ditemukan.</p>
         )}
+
+
+        {data.detail.length > 0 && (
+  <div className=" p-6 bg-slate-50 border border-blue-200 rounded-lg shadow-inner text-green-800 text-lg font-semibold text-center">
+    Total Nilai Akhir: {totalScore.toFixed(2)} dari {maxScore.toFixed(2)}
+
+    <button
+  className="btn btn-md btn-ghost bg-blue-500 text-white ml-5 gap-2"
+  onClick={submitAssessment}
+  disabled={isLoading !== null}
+>
+  {isLoading === "SUBMIT" ? (
+    <>
+      <svg
+        className="animate-spin h-5 w-5 text-white"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        ></circle>
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8v8H4z"
+        ></path>
+      </svg>
+      Menyimpan...
+    </>
+  ) : (
+    <>
+      <svg
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        viewBox="0 0 24 24"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+      </svg>
+      Simpan Penilaian
+    </>
+  )}
+</button>
+
+  </div>
+  )}
+
       </div>
+
+
+
+   
+
+
+   
       
     </DefaultLayout>
   );
 };
 
 export default DetailJawaban;
+
+   {/* <div className="flex justify-end mt-6">
+        <button
+          className="btn btn-primary"
+          onClick={() => window.history.back()}
+        >
+          Kembali
+        </button>
+      </div> */}
 
