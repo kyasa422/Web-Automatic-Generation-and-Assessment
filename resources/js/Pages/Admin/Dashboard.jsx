@@ -3,152 +3,77 @@ import { usePage } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
 
 import CardDataStats from "@/Components/Tables/CardDataStats";
-import TableOne from "@/Components/Tables/TableOne";
-import ChatCard from "@/Components/Tables/ChatCard";
+import { FaUsers, FaChalkboardTeacher, FaUserGraduate, FaBook } from "react-icons/fa";
+
+// import TableOne from "@/Components/Tables/TableOne";
+// import ChatCard from "@/Components/Tables/ChatCard";
 import Users from "@/Components/Tables/Users";
 
 const AdminDashboard = () => {
     const {
-        mitraData,
+   
         userData,
         guruData,
-        cabangs,
-        laporanCabang,
-        laporanPengeluaranCabang,
-        laporanMitra,
-        laporanPengeluaranMitra,
-        laporanPrivate,
-        laporanPengeluaranPrivate,
+        totalUsers,
+        totalGurus,
+        totalStudents,
+        totalSubjects,
+
     } = usePage().props;
 
 
-    const calculateTotals = (
-        laporanCabangData,
-        laporanPengeluaranCabangData
-    ) => {
-        // Pastikan data adalah array
-        if (!Array.isArray(laporanCabangData)) laporanCabangData = [];
-        if (!Array.isArray(laporanPengeluaranCabangData))
-            laporanPengeluaranCabangData = [];
-
-        // Hitung total pemasukan
-        const totalProfit = laporanCabangData.reduce(
-            (sum, laporan) => sum + (laporan.totalpemasukan || 0),
-            0
-        );
-
-        // Hitung total pengeluaran
-        const totalOutcome = laporanPengeluaranCabangData.reduce(
-            (sum, pengeluaran) => sum + (pengeluaran.totalpengeluaran || 0),
-            0
-        );
-
-        // Hitung total laba
-        const totalLaba = totalProfit - totalOutcome;
-
-        // Hitung total students (biaya)
-        const totalStudents = laporanCabangData.reduce(
-            (sum, laporan) =>
-                sum +
-                ((laporan.biaya_5000 || 0) +
-                    (laporan.biaya_10000 || 0) +
-                    (laporan.biaya_12000 || 0)),
-            0
-        );
-
-        return { totalLaba, totalProfit, totalOutcome, totalStudents };
-    };
-
-    // Memastikan .data digunakan saat memanggil fungsi
-    const { totalLaba, totalProfit, totalOutcome, totalStudents } =
-        calculateTotals(laporanCabang.data, laporanPengeluaranCabang.data);
-
-        const calculateTotalsM = (laporanMitraData, laporanPengeluaranMitraData) => {
-          // Pastikan data adalah array
-          if (!Array.isArray(laporanMitraData)) laporanMitraData = [];
-          if (!Array.isArray(laporanPengeluaranMitraData)) laporanPengeluaranMitraData = [];
-      
-          // Hitung total pemasukan
-          const totalProfitM = laporanMitraData.reduce(
-              (sum, laporan) => sum + (laporan.totalpemasukan || 0),
-              0
-          );
-      
-          // Hitung total pengeluaran
-          const totalOutcomeM = laporanPengeluaranMitraData.reduce(
-              (sum, pengeluaran) => sum + (pengeluaran.totalpengeluaran || 0),
-              0
-          );
-      
-          // Hitung total laba
-          const totalLabaM = totalProfitM - totalOutcomeM;
-      
-          // Hitung total students (biaya)
-          const totalStudentsM = laporanMitraData.reduce(
-              (sum, laporan) =>
-                  sum +
-                  ((laporan.biaya_5000 || 0) +
-                      (laporan.biaya_8000 || 0) +
-                      (laporan.biaya_10000 || 0) +
-                      (laporan.biaya_15000 || 0)),
-              0
-          );
-      
-          return { totalLabaM, totalProfitM, totalOutcomeM, totalStudentsM };
-      };
-      
-      // Memastikan .data digunakan saat memanggil fungsi
-      const { totalLabaM, totalProfitM, totalOutcomeM, totalStudentsM } = calculateTotalsM(
-          laporanMitra.data,
-          laporanPengeluaranMitra.data
-      );
-
-      const calculateTotalsP = (laporanPrivateData, laporanPengeluaranPrivateData) => {
-        // Pastikan data adalah array
-        if (!Array.isArray(laporanPrivateData)) laporanPrivateData = [];
-        if (!Array.isArray(laporanPengeluaranPrivateData)) laporanPengeluaranPrivateData = [];
-    
-        // Hitung total pemasukan
-        const totalProfitP = laporanPrivateData.reduce(
-            (sum, laporan) => sum + (laporan.totalpemasukan || 0),
-            0
-        );
-    
-        // Hitung total pengeluaran
-        const totalOutcomeP = laporanPengeluaranPrivateData.reduce(
-            (sum, pengeluaran) => sum + (pengeluaran.totalpengeluaran || 0),
-            0
-        );
-    
-        // Hitung total laba
-        const totalLabaP = totalProfitP - totalOutcomeP;
-    
-        // Hitung total students (biaya)
-        const totalStudentsP = laporanPrivateData.reduce(
-            (sum, laporan) =>
-                sum +
-                ((laporan.biaya_30 || 0) +
-                    (laporan.biaya_35 || 0) +
-                    (laporan.biaya_40 || 0) +
-                    (laporan.biaya_45 || 0)),
-            0
-        );
-    
-        return { totalLabaP, totalProfitP, totalOutcomeP, totalStudentsP };
-    };
-    
-    // Memastikan .data digunakan saat memanggil fungsi
-    const { totalLabaP, totalProfitP, totalOutcomeP, totalStudentsP } = calculateTotalsP(
-        laporanPrivate.data,
-        laporanPengeluaranPrivate.data
-    );
-
+   
     return (
         <DefaultLayout>
+
+
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 pb-10">
+          <CardDataStats
+          title="Total Users"
+          total={totalUsers}
+          rate=""
+          levelUp={false}
+        >
+          <FaUsers className="text-xl text-blue-600" />
+        </CardDataStats>
+
+        <CardDataStats
+          title="Total Guru"
+          total={totalGurus}
+          rate=""
+          levelUp={false}
+        >
+          <FaChalkboardTeacher className="text-xl text-green-600" />
+        </CardDataStats>
+
+        <CardDataStats
+          title="Total Siswa"
+          total={totalStudents}
+          rate=""
+          levelUp={false}
+        >
+          <FaUserGraduate className="text-xl text-purple-600" />
+        </CardDataStats>
+
+        <CardDataStats
+          title="Mata Pelajaran"
+          total={totalSubjects}
+          rate=""
+          levelUp={false}
+        >
+          <FaBook className="text-xl text-pink-600" />
+        </CardDataStats>
+        
+        <Users userData={userData} />
+
+
+
+            </div>
+
+            {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 pb-10">
                 <CardDataStats
                     title="Total Laba"
-                    total={`Rp ${(totalLaba+totalLabaM+totalLabaP).toLocaleString()}`}
+                    // total={`Rp ${(totalLaba+totalLabaM+totalLabaP).toLocaleString()}`}
                     rate=""
                     levelUp
                 >
@@ -172,7 +97,7 @@ const AdminDashboard = () => {
                 </CardDataStats>
                 <CardDataStats
                     title="Total Pemasukan"
-                    total={`Rp ${(totalProfit+totalProfitM+totalProfitP).toLocaleString()}`}
+                    // total={`Rp ${(totalProfit+totalProfitM+totalProfitP).toLocaleString()}`}
                     rate=""
                     levelUp
                 >
@@ -200,7 +125,7 @@ const AdminDashboard = () => {
                 </CardDataStats>
                 <CardDataStats
                     title="Total Pengeluaran"
-                    total={`Rp ${(totalOutcome+totalOutcomeM+totalOutcomeP).toLocaleString()}`}
+                    // total={`Rp ${(totalOutcome+totalOutcomeM+totalOutcomeP).toLocaleString()}`}
                     rate=""
                     levelUp
                 >
@@ -224,7 +149,7 @@ const AdminDashboard = () => {
                 </CardDataStats>
                 <CardDataStats
                     title="Total Students"
-                    total={(totalStudents+totalStudentsM+totalStudentsP).toLocaleString()}
+                    // total={(totalStudents+totalStudentsM+totalStudentsP).toLocaleString()}
                     rate=""
                     levelUp
                 >
@@ -250,23 +175,19 @@ const AdminDashboard = () => {
                         />
                     </svg>
                 </CardDataStats>
-            </div>
+            </div> */}
 
-            <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
+            {/* <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
                 <div className="col-span-12 xl:col-span-8">
                     <TableOne
-                        cabang={cabangs}
-                        laporanCabang={laporanCabang}
-                        laporanPengeluaranCabang={laporanPengeluaranCabang}
-                        laporanMitra={laporanMitra}
-                        laporanPengeluaranMitra={laporanPengeluaranMitra}
-                        laporanPengeluaranPrivate={laporanPengeluaranPrivate}
-                        laporanPrivate={laporanPrivate}
+         
                     />
                 </div>
-                {/* <ChatCard /> */}
+                <ChatCard />
                 <Users userData={userData} />
-            </div>
+            </div> */}
+
+            
         </DefaultLayout>
     );
 };

@@ -19,16 +19,36 @@ const DropdownUser = () => {
                 onClick={toggleDropdown}
                 className="flex items-center gap-4"
             >
-                <span className="text-right lg:block">
-                    <span className="block text-sm font-medium text-black dark:text-white">
-                        {user.name}
-                    </span>
-                    {user?.roles?.map((role) => (
-                        <span key={role.id} className="block text-xs text-gray-400 dark:text-gray-500">
-                            {role.name}
-                        </span>
-                    ))}
+               <span className="text-right lg:block">
+                <span className="block text-sm font-medium text-black dark:text-white">
+                    {user.name}
                 </span>
+
+                <div className="flex flex-wrap items-center gap-2 mt-1">
+                    {user?.roles?.map((role) => (
+                        <div key={role.id} className="flex items-center gap-2">
+                            <span className="text-xs text-gray-400 dark:text-gray-500">
+                                {role.name}
+                            </span>
+
+                            {/* Jika role-nya Siswa, tampilkan permissions secara horizontal */}
+                            {role.name === "Siswa" && user?.permissions?.length > 0 && (
+                                <div className="flex flex-wrap items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
+                                    {user.permissions.map((perm) => (
+                                        <span
+                                            key={perm.id}
+                                            className=" px-2 py-0.5 rounded"
+                                        >
+                                            {perm.name}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </span>
+
                 <svg
                     className=" fill-current sm:block"
                     width="12"
@@ -50,17 +70,9 @@ const DropdownUser = () => {
                 <div
                     className="absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark"
                 >
-                    <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-7.5 dark:border-strokedark">
-                        <li>
-                            <Link
-                                href="/profile"
-                                className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
-                                onClick={closeDropdown}
-                            >
-                                My Profile
-                            </Link>
-                        </li>
-                        <li>
+                    <ul className="flex flex-col  border-b border-stroke px-2 py-3 dark:border-strokedark ">
+              
+                        <li className="text-md font-medium text-red-500 dark:text-white">
                             
 
                             <Link href={route('logout')}

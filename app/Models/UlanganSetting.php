@@ -36,6 +36,11 @@ public function ulanganJawabanHasOne(){
     return $this->hasOne(UlanganJawaban::class, "ulangan_setting_id", "id"); 
 }
 
+public function assessment()
+{
+    return $this->hasMany(Assessment::class, 'ulangan_setting_id', 'id');
+}
+
 
 
 }

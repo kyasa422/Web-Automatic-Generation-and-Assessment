@@ -12,8 +12,10 @@ use App\Models\UlanganJawaban;
 use App\Models\UlanganSetting;
 use App\Models\Question;
 use App\Models\QuestionInquiry;
+use App\Models\Subject;
+use App\Models\Assessment;
+use App\Models\MultipleChoice;
 
-use App\Models\LapPengeluaranCabang;
 use Inertia\Response;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -98,6 +100,47 @@ public function submitUjian(Request $request, \App\Models\UlanganSetting $ulanga
 
     return redirect()->route('siswa.dashboard')->with('success', 'Ujian berhasil dikumpulkan!');
 }
+
+public function showUjianResult()
+{
+    $userId = auth()->id();
+
+    $assessments = Assessment::where('user_id', $userId)
+        ->with([
+            'setting.question.subject',
+            'user',
+        ])
+        ->get();
+
+    return Inertia::render('Siswa/mapel', [
+        'assessments' => $assessments,
+    ]);
+}
+
+public function showAssessmentDetail(Assessment $assessment)
+{
+    $assessment->load([
+        'user',
+        'setting.question.subject',
+        'taskCollections.question',
+        'taskCollections.questionInquiry',
+        'taskCollections.questionInquiry.multipleChoice',
+        'taskCollections.questionInquiry.ulanganJawaban' => function ($query) use($assessment) {
+            $query->where('user_id', '=', auth()->id());
+            $query->whereHas("setting", function($query) use($assessment){
+                $query->whereHas('assessment', function($query) use($assessment){
+                    $query->where('id', '=', $assessment->id);
+                });
+            });
+        },
+    ]);
+
+    return Inertia::render('Siswa/AssessmentDetail', [
+        'assessment' => $assessment,
+    ]);
+}
+
+
 
 
 

@@ -35,12 +35,12 @@ export default function Login({ status, canResetPassword }) {
                                 >
                                     <img
                                         className="w-[50px] h-[50px]"
-                                        src="images/AlbriAssets/AlbriLogo.png"
+                                        src="images/logotamsis.png"
                                         alt="Logo"
                                     />
 
-                                    <h1 className="text-4xl font-bold text-blue-700">
-                                        Albri
+                                    <h1 className="text-4xl font-bold text-green-800">
+                                        TAMANSISWA 2 JAKARTA
                                     </h1>
                                 </Link>
                             </div>
@@ -177,10 +177,10 @@ export default function Login({ status, canResetPassword }) {
                     <div className="w-full border-stroke dark:border-strokedark xl:w-1/2 xl:border-l-2">
                         <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
                             <span className="mb-1.5 block font-medium">
-                                Welcome
+                                {/* Welcome */}
                             </span>
                             <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
-                                Sign In to Albri
+                                Masuk ke akun Anda
                             </h2>
 
                             <form onSubmit={submit}>
@@ -265,7 +265,7 @@ export default function Login({ status, canResetPassword }) {
                                     <div className="mb-5">
                                         <input
                                             type="submit"
-                                            value="Sign In"
+                                            value="Masuk"
                                             className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
                                         />
                                     </div>

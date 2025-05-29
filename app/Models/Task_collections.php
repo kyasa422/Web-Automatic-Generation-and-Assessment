@@ -48,4 +48,9 @@ class Task_collections extends Model
     {
         return $this->belongsTo(Question::class, 'question_id', 'id');
     }
+    // ulangan jawaban
+    public function ulanganJawaban()
+    {
+        return $this->hasMany(UlanganJawaban::class, 'task_collections_id', 'id');
+    }
 }

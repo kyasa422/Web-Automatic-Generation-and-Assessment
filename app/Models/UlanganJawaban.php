@@ -32,11 +32,19 @@ class UlanganJawaban extends Model
         return $this->belongsTo(Question::class);
     }
     public function questionInquiry()
-{
+    {
     return $this->belongsTo(QuestionInquiry::class);
-}
+    }
     public function ulanganpermission()
     {
         return $this->hasMany(UlanganPermission::class);
     }
+
+    // UlanganJawaban.php
+public function assessment()
+{
+    return $this->hasOne(Assessment::class, 'user_id', 'user_id')
+        ->whereColumn('ulangan_setting_id', 'ulangan_setting_id');
+}
+
 }

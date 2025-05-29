@@ -1,47 +1,29 @@
-import React from "react";
+// import React from "react";
 import { usePage, useForm } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
+import React, { useEffect, useState } from "react";
+
 
 const CreateUsers = () => {
-    const { roles, permissions } = usePage().props;  // Mengambil data roles dari props
-    const { data, setData, post, errors } = useForm({
+    const { data, setData, post, errors,reset } = useForm({
         name: '',
         email: '',
         password: '',
         password_confirmation: '',
-        roles: [],
-        permissions: [],
+        // permissions: [],
 
     });
+
+    useEffect(() => {
+        reset();
+    }, []);
 
     const handleSubmit = (e) => {
         e.preventDefault();
         post('/admin/users');
-        //  jika berhasil, akan diarahkan ke halaman /admin/users
-        
-
- 
-    };
-
-    const handleRoleChange = (e) => {
-        const options = e.target.options;
-        const selectedRoles = [];
-        for (let i = 0; i < options.length; i++) {
-            if (options[i].selected) {
-                selectedRoles.push(options[i].value);
-            }
-        }
-        setData('roles', selectedRoles);
 
     };
 
-    const handlePermissionChange = (e) => {
-        const { value, checked } = e.target;
-        setData("permissions", checked 
-            ? [...data.permissions, value] 
-            : data.permissions.filter((perm) => perm !== value)
-        );
-    }
 
     return (
         <DefaultLayout>
@@ -108,52 +90,7 @@ const CreateUsers = () => {
                         {errors.password_confirmation && <div className="text-red-500">{errors.password_confirmation}</div>}
                     </div>
 
-                    {/* Dropdown Roles */}
-                    <div className="w-full xl:w-1/2 mb-4.5">
-                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                            Role
-                        </label>
-                        <select
-                            name="roles"
-                            className="form-control"
-                            multiple
-                            value={data.roles}
-                            onChange={handleRoleChange}
-                        >
-                            {Object.entries(roles).map(([value, label]) => (
-                                <option key={value} value={value}>
-                                    {label}
-                                </option>
-                            ))}
-                        </select>
-                        {errors.roles && <div className="text-red-500">{errors.roles}</div>}
-                    </div>
 
-                    {/* Checkbox Permissions */}
-                    <div className="w-full xl:w-1/2 mb-4.5">
-                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                            Permissions
-                        </label>
-                        {permissions.map((permission) => (
-                            <label key={permission.id} className="block">
-                                <input
-                                    type="checkbox"
-                                    name="permissions"
-                                    value={permission.id}
-                                    checked={data.permissions.includes(permission.id)}
-                                    onChange={handlePermissionChange}
-                                />
-                                {permission.name}
-                            </label>
-                        ))}
-                        {errors.permissions && <div className="text-red-500">{errors.permissions}</div>}
-                    </div>
-
-
-
-                    
-
-                    {/* Tombol Submit */}
                     <button type="submit" className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
                         Add User
                     </button>

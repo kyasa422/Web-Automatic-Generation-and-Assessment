@@ -27,13 +27,16 @@ class HandleInertiaRequests extends Middleware
      *
      * @return array<string, mixed>
      */
-    public function share(Request $request): array
+       public function share(Request $request): array
     {
-        return [
-            ...parent::share($request),
-            'auth' => [
-                'user' => $request->user(),
+        return array_merge(parent::share($request), [
+            'env' => [
+                'GEMINI_API_KEY' => env('GEMINI_API_KEY'),
+                'GEMINI_MODEL_NAME' => env('GEMINI_MODEL_NAME'),
             ],
-        ];
+            'auth' => [
+                'user' => $request->user() ? $request->user()->load('roles', 'permissions') : null,
+            ],
+        ]);
     }
 }

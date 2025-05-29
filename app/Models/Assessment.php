@@ -19,7 +19,7 @@ class Assessment extends Model
     // Relasi ke ulangan_setting
     public function ulanganSetting()
     {
-        return $this->belongsTo(UlanganSetting::class);
+    return $this->belongsTo(UlanganSetting::class, 'ulangan_setting_id');
     }
 
     // Relasi ke user
@@ -31,6 +31,16 @@ class Assessment extends Model
     // Relasi ke task collections (anak)
     public function taskCollections()
     {
-        return $this->hasMany(TaskCollection::class);
+        return $this->hasMany(Task_collections::class);
     }
+
+    // Relasi ke setting
+    public function setting()
+    {
+        return $this->belongsTo(UlanganSetting::class, 'ulangan_setting_id');
+    }
+
+
+
+
 }

@@ -15,4 +15,10 @@ class QuestionInquiry extends Model
     return $this->hasMany(MultipleChoice::class, 'questionInquiryId');
 }
 
+// Relasi ke Ulangan jawaban
+public function ulanganJawaban()
+{
+    return $this->hasMany(UlanganJawaban::class, 'question_inquiry_id', 'id'); 
+}
+
 }

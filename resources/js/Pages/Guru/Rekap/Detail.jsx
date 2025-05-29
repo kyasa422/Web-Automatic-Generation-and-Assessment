@@ -12,7 +12,7 @@ const Detail = () => {
   return (
     <DefaultLayout>
       <div className="p-6">
-        <h1 className="text-2xl font-bold mb-4">Detail Rekap Jawaban Siswa</h1>
+        <h1 className="text-2xl font-bold mb-4">Detail Informasi Ujian</h1>
         <table className="w-full text-left border">
           <thead className="bg-gray-200">
             <tr>
@@ -22,7 +22,7 @@ const Detail = () => {
               <th className="p-2 border">Kelas</th>
               <th className="p-2 border">Jenis Ujian</th>
               <th className="p-2 border">Tanggal Dikerjakan</th>
-              <th className="p-2 border">Skor / Status</th>
+              <th className="p-2 border">Nilai / Status</th>
               <th className="p-2 border">Aksi</th>
             </tr>
           </thead>
@@ -36,7 +36,11 @@ const Detail = () => {
                   <td className="p-2 border">{item.setting.question.classLevel}</td>
                   <td className="p-2 border">{item.examLevel ? "Ulangan Tengah Semester" : "Ulangan Akhir Semester"}</td>
                   <td className="p-2 border">{moment(item.created_at).format("DD MMMM YYYY HH:mm")}</td>
-                  <td className="p-2 border">Belum dinilai</td>
+                <td className="p-2 border">
+  {item.nilai !== null ? item.nilai : "Belum dinilai"}
+</td>
+
+
                     <td className="p-2 border">
                       <Link
                                   href={route('guru.rekapsoal.show', {

@@ -14,13 +14,7 @@ use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Subject;
-use App\Models\Cabangalbri;
-use App\Models\LapPemasukanCabang;
-use App\Models\LapPengeluaranCabang;
-use App\Models\LapPemasukanMitra;
-use App\Models\LapPengeluaranMitra;
-use App\Models\LapPemasukanPrivate;
-use App\Models\LapPengeluaranPrivate;
+
 
 
 
@@ -30,82 +24,44 @@ use App\Models\LapPengeluaranPrivate;
 class AdminController extends Controller
 {
     public function index(Request $request)
-    {
-        $mitraData = User::whereHas('roles', function ($query) {
-            $query->where('name', 'Mitra');
-        })
-            ->latest()
-            ->paginate(5, ['*'], 'mitraPage'); // pagination untuk mitra
+{
+    $userData = User::with('roles')
+        ->latest()
+        ->paginate(5, ['*'], 'userPage');
 
-        $userData = User::with('roles') // Mengambil data roles juga
-            ->latest()
-            ->paginate(5, ['*'], 'userPage');
-
-        $guruData = User::whereHas('roles', function ($query) {
+    $guruData = User::whereHas('roles', function ($query) {
+        $query->where('name', 'Guru');
+    })
+        ->with(['roles' => function ($query) {
             $query->where('name', 'Guru');
-        })
-            ->with(['roles' => function ($query) {
-                $query->where('name', 'Guru');
-            }])
-            ->latest()
-            ->paginate(5, ['*'], 'guruPage');
+        }])
+        ->latest()
+        ->paginate(5, ['*'], 'guruPage');
 
-        $cabangs = Cabangalbri::all();
+    // ✅ Hitung total
+    $totalUsers = User::count();
 
+    $totalGurus = User::whereHas('roles', function ($query) {
+        $query->where('name', 'Guru');
+    })->count();
 
+    $totalStudents = User::whereHas('roles', function ($query) {
+        $query->where('name', 'Siswa');
+    })->count();
 
-        $bulan = $request->input('bulan', date('m'));
-        $tahun = $request->input('tahun', date('Y'));
+    $totalSubjects = Subject::count();
 
-        // Filter data berdasarkan bulan dan tahun
-        $laporanCabang = LapPemasukanCabang::with('cabang')
-            ->whereMonth('tanggal', $bulan)
-            ->whereYear('tanggal', $tahun)
-            ->orderBy('tanggal', 'desc')
-            ->paginate(10, ['*'], 'laporanCabangPage'); // Sesuaikan jumlah per halaman
+    return Inertia::render('Admin/Dashboard', [
+        'userData' => $userData,
+        'guruData' => $guruData,
 
-            $laporanPengeluaranCabang = LapPengeluaranCabang::with('cabang', 'user')
-            ->whereMonth('tanggal', $bulan)
-            ->whereYear('tanggal', $tahun)
-            ->orderBy('tanggal', 'desc')
-            ->paginate(10, ['*'], 'laporanCabangPage');
-
-            $laporanMitra = LapPemasukanMitra::whereMonth('tanggal', $bulan)
-            ->whereYear('tanggal', $tahun)
-            ->orderBy('tanggal', 'desc')
-            ->paginate(10, ['*'], 'laporanMitraPage'); // Sesuaikan jumlah per halaman
-        $laporanPengeluaranMitra = LapPengeluaranMitra::with('user')
-            ->whereMonth('tanggal', $bulan)
-            ->whereYear('tanggal', $tahun)
-            ->orderBy('tanggal', 'desc')
-            ->paginate(10, ['*'], 'laporanMitraPage');
-            $laporanPrivate = LapPemasukanPrivate::whereMonth('tanggal', $bulan)
-            ->whereYear('tanggal', $tahun)
-            ->orderBy('tanggal', 'desc')
-            ->paginate(10, ['*'], 'laporanPrivatePage'); // Sesuaikan jumlah per halaman
-            $laporanPengeluaranPrivate = LapPengeluaranPrivate::with('user')
-            ->whereMonth('tanggal', $bulan)
-            ->whereYear('tanggal', $tahun)
-            ->orderBy('tanggal', 'desc')
-            ->paginate(10, ['*'], 'laporanPrivatePage');
-
-        return Inertia::render('Admin/Dashboard', [
-            'mitraData' => $mitraData,
-            'userData' => $userData,
-            'guruData' => $guruData,
-            'cabangs' => $cabangs,
-
-            'laporanCabang' => $laporanCabang,
-            'laporanPengeluaranCabang' => $laporanPengeluaranCabang,
-            'laporanMitra' => $laporanMitra,
-            'laporanPengeluaranMitra' => $laporanPengeluaranMitra,
-
-            'laporanPrivate' => $laporanPrivate,
-            'laporanPengeluaranPrivate' => $laporanPengeluaranPrivate,
-
-
-        ]);
-    }
+        // ✅ Tambahkan ke frontend
+        'totalUsers' => $totalUsers,
+        'totalGurus' => $totalGurus,
+        'totalStudents' => $totalStudents,
+        'totalSubjects' => $totalSubjects,
+    ]);
+}
 
     public function guru()
     {
@@ -148,6 +104,8 @@ class AdminController extends Controller
             return Redirect::route('guru.settings')->with('success', 'Profil berhasil diperbarui.');
         } else if ($request->user()->hasRole('Mitra')) {
             return Redirect::route('mitra.settings')->with('success', 'Profil berhasil diperbarui.');
+        } else if ($request->user()->hasRole('Siswa')) {
+            return Redirect::route('siswa.settings')->with('success', 'Profil berhasil diperbarui.');
         }
 
         return Redirect::route('admin.settings');

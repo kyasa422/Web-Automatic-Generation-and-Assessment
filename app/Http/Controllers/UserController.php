@@ -25,16 +25,6 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $userData = User::with('roles')->latest()->paginate(10); 
-
-        $mitraData = User::whereHas('roles', function ($query) {
-            $query->where('name', 'Mitra');
-        })->with(['roles' => function ($query) {
-            $query->where('name', 'Mitra');
-        }])
-        ->latest()
-        ->paginate(5, ['*'], 'mitraPage'); // pagination untuk mitra
-
         // guru data
         $guruData = User::whereHas('roles', function ($query) {
             $query->where('name', 'Guru');
@@ -45,30 +35,10 @@ class UserController extends Controller
         ->latest()
         ->paginate(5, ['*'], 'guruPage');
 
-        // private data 
-        $privateData = User::whereHas('roles', function ($query) {
-            $query->where('name', 'Private');
-        })->with(['roles' => function ($query) {
-            $query->where('name', 'Private');
-        }])
-        ->latest()
-        ->paginate(5, ['*'], 'privatePage'); // pagination untuk private
-
-        // admin data
-        $adminData = User::whereHas('roles', function ($query) {
-            $query->where('name', 'Admin');
-        })->with(['roles' => function ($query) {
-            $query->where('name', 'Admin');
-        }])->latest()->paginate(5, ['*'], 'adminPage'); // pagination untuk admin
-
-
-  
         return Inertia::render('Admin/Usersguru/index', [
-            'userData' => $userData,
-            'mitraData' => $mitraData,
+            
             'guruData' => $guruData,
-            'privateData' => $privateData,
-            'adminData' => $adminData,
+           
         ]);
     }
     
@@ -106,19 +76,19 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|confirmed|min:8',
-            'roles' => 'required'
         ]);
     
         $input = $request->all();
         $input['password'] = Hash::make($input['password']);
     
         $user = User::create($input);
-        $user->assignRole($request->input('roles'));
+        $roles = $request->input('roles', ['Guru']);
+        $user->assignRole($roles);  
 
         
     
         // Redirect dengan Inertia::location untuk refresh halaman penuh
-        return Inertia::location('/admin/users');
+        return redirect()->route('admin.usersguru'); // Pastikan route ini sesuai dengan halaman yang Anda inginkan
     }
     
     
@@ -167,50 +137,123 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function update(Request $request, $id): RedirectResponse
-    {
-        Log::info('Received permissions:', $request->input('permissions'));
+//   use Spatie\Permission\Models\Role;
 
-        // Validasi input
-        $validatedData = $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users,email,' . $id,
-            'password' => 'nullable|min:8', // Password optional
-            'roles' => 'required|array', // Validasi roles sebagai array
-            'permissions' => 'nullable|array', // Validasi permissions sebagai array
-        
-        ]);
-    
-        // Mengambil input data kecuali password jika kosong
-        $input = $request->except(['password']);
-        if (!empty($request->password)) {
-            $input['password'] = Hash::make($request->password);
-        }
-    
-        // Update data user
-        $user = User::findOrFail($id);
-        $user->update($input);
-    
-        // Hapus roles yang lama dan assign role baru
-        $user->roles()->sync($request->roles);
+public function update(Request $request, $id): RedirectResponse 
+{
+    Log::info('Received permissions:', $request->input('permissions'));
 
-        $user->syncPermissions($request->permissions);
+    $validatedData = $request->validate([
+        'name' => 'required',
+        'email' => 'required|email|unique:users,email,' . $id,
+        'password' => 'nullable|min:8',
+        'roles' => 'required|array',
+        'permissions' => 'nullable|array',
+    ]);
 
-    
-        // Redirect dengan Inertia::location untuk refresh halaman penuh
-        return redirect()->route('admin.usersguru'); // Pastikan route ini sesuai dengan halaman yang Anda inginkan
+    $input = $request->except(['password']);
+    if (!empty($request->password)) {
+        $input['password'] = Hash::make($request->password);
     }
-    
-    
+
+    $user = User::findOrFail($id);
+    $user->update($input);
+
+    // Sync roles dan permissions
+    $user->roles()->sync($request->roles);
+    $user->syncPermissions($request->permissions);
+
+    // Ambil ID role pertama
+    $roleId = $request->roles[0] ?? null;
+
+    // Cari nama role berdasarkan ID
+    $role = Role::find($roleId);
+    $roleName = $role?->name;
+
+    // Redirect sesuai role
+    if ($roleName === 'Admin') {
+        return redirect()->route('admin.users');
+    } elseif ($roleName === 'Guru') {
+        return redirect()->route('admin.usersguru');
+    } else {
+        return redirect()->route('admin.dashboard');
+    }
+}
+
     /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id): RedirectResponse
+public function destroy($id): RedirectResponse
+{
+    $user = User::findOrFail($id);
+
+    // Ambil role pertama user (asumsi user hanya punya satu role utama)
+    $roleName = $user->roles()->first()?->name;
+
+    // Hapus user
+    $user->delete();
+
+    // Redirect sesuai role yang dihapus
+    if ($roleName === 'Admin') {
+        return redirect()->route('admin.users');
+    } elseif ($roleName === 'Guru') {
+        return redirect()->route('admin.usersguru');
+    } else {
+        return redirect()->route('admin.dashboard'); // fallback jika role tidak dikenali
+    }
+}
+
+
+    // Admin
+
+    public function indexadmin(){
+    // guru data
+        $adminData = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Admin');
+        })
+        ->with(['roles' => function ($query) {
+            $query->where('name', 'Admin');
+        }])
+        ->latest()
+        ->paginate(5, ['*'], 'adminPage');
+
+        return Inertia::render('Admin/Usersadmin/index', [
+            
+            'adminData' => $adminData,
+           
+        ]);
+    }
+
+    public function createadmin()
     {
-        User::find($id)->delete();
+
+        return Inertia::render('Admin/Usersadmin/create', [
+            
+
+        ]);
+    }
+
+    public function storeadmin(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|confirmed|min:8',
+        ]);
+    
+        $input = $request->all();
+        $input['password'] = Hash::make($input['password']);
+    
+        $user = User::create($input);
+        $roles = $request->input('roles', ['Admin']);
+        $user->assignRole($roles);  
+
+        
+    
+        // Redirect dengan Inertia::location untuk refresh halaman penuh
         return redirect()->route('admin.users'); // Pastikan route ini sesuai dengan halaman yang Anda inginkan
     }
 

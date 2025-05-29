@@ -6,6 +6,7 @@ import { router } from '@inertiajs/react';
 
 const Laporan = () => {
     const { permissions, available_exams } = usePage().props;
+    console.log(available_exams);
 
     return (
         <DefaultLayout>
@@ -22,10 +23,10 @@ const Laporan = () => {
                                 {exam.question.subject.name}
                             </h2>
                             <p><strong>Guru:</strong> {exam.question.teacher.name}</p>
-                            <p><strong>Kelas:</strong> {exam.question.class_level}</p>
+                            <p><strong>Kelas:</strong> {permissions}</p>
                             <p>
                                 <strong>Jenis Ujian:</strong>{" "}
-                                {exam.question.exam_level ? "UAS" : "UTS"}
+                                {exam.question.examLevel ? "UAS" : "UTS"}
                             </p>
                             <p>
                                 <strong>Waktu Aktif:</strong><br />
