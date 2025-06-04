@@ -98,7 +98,7 @@ const BankSoal = () => {
 
                                         <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer mr-1" />
                     
-                      Detail
+                      Siapkan Ujian
                                         </span>
                     </Link>
 

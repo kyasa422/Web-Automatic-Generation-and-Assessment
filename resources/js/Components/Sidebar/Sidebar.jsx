@@ -458,7 +458,7 @@ const menuGroupsSiswa = [{
                         />
                     </svg>
                 ),
-                label: "Hasil Ulangan",
+                label: "Hasil Ujian",
                 route: "/siswa/hasilulangan",
             },
 
