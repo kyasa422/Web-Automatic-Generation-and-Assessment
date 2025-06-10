@@ -7,6 +7,7 @@ import { router } from '@inertiajs/react';
 const Laporan = () => {
     const { permissions, available_exams } = usePage().props;
     console.log(available_exams);
+    console.log(permissions);
 
     return (
         <DefaultLayout>

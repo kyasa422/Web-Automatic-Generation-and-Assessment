@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { router, usePage } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
+import Swal from 'sweetalert2';
+import { useEffect } from 'react';
 
 export default function Index() {
     const { permissions, flash } = usePage().props;
@@ -18,15 +20,34 @@ export default function Index() {
     };
 
     const handleDelete = (id) => {
-        if (confirm("Delete this permission?")) {
-            router.delete(`/permissions/${id}`);
+    Swal.fire({
+        title: 'Apakah Anda yakin?',
+        text: 'Data ini akan dihapus permanen!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            router.delete(`/permissions/${id}`, {
+                onSuccess: () => {
+                    Swal.fire('Berhasil!', 'Data telah dihapus.', 'success');
+                },
+                onError: () => {
+                    Swal.fire('Gagal!', 'Terjadi kesalahan saat menghapus.', 'error');
+                }
+            });
         }
-    };
+    });
+};
+
 
     return (
         <DefaultLayout>
         <div className="p-6 max-w-2xl mx-auto">
-            <h2 className="text-xl font-bold mb-4">Manage Permissions</h2>
+            <h2 className="text-xl font-bold mb-4">Kelola Kelas</h2>
 
             {/* {flash.success && (
                 <div className="p-2 bg-green-500 text-white mb-3">
@@ -44,7 +65,7 @@ export default function Index() {
                     required
                 />
                 <button type="submit" className="mt-2 p-2 bg-blue-500 text-white">
-                    Add Permission
+                    Tambah Kelas
                 </button>
             </form>
 

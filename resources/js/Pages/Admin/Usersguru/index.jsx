@@ -2,9 +2,35 @@ import React from "react";
 import { usePage, Link } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import Swal from 'sweetalert2';
+import { useEffect } from 'react';
+import { router } from '@inertiajs/react'; // jika pakai Inertia.js
 
 const GuruUsers = () => {
     const { guruData } = usePage().props;
+    const handleDelete = (id) => {
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: 'Data ini akan dihapus permanen!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(`/admin/userssiswa/${id}`, {
+                    onSuccess: () => {
+                        Swal.fire('Berhasil!', 'Data telah dihapus.', 'success');
+                    },
+                    onError: () => {
+                        Swal.fire('Gagal!', 'Terjadi kesalahan saat menghapus.', 'error');
+                    }
+                });
+            }
+        });
+    };
 
     return (
         <DefaultLayout>
@@ -14,13 +40,13 @@ const GuruUsers = () => {
                         Data Guru
                     </h4>
 
-                                 <div>
-                                            <Link href="/admin/usersguru/create">
-                                                <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
-                                                    Tambah Guru
-                                                </button>
-                                            </Link>
-                                        </div>
+                    <div>
+                        <Link href="/admin/usersguru/create">
+                            <button className="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
+                                Tambah Guru
+                            </button>
+                        </Link>
+                    </div>
                 </div>
 
                 <div className="overflow-x-auto">
@@ -58,19 +84,13 @@ const GuruUsers = () => {
                                             <Link href={`/admin/users/${user.id}/edit`}>
                                                 <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer" />
                                             </Link>
-                                            <Link
-                                                href={`/admin/users/${user.id}`}
-                                                method="delete"
-                                                as="button"
-                                                data={{ id: user.id }}
-                                                onClick={(e) => {
-                                                    if (!confirm("Dengan Perhatian! Jika anda menghapus data ini, maka data yang berhubungan dengan data ini juga akan terhapus. Apakah anda yakin?")) {
-                                                        e.preventDefault();
-                                                    }
-                                                }}
+                                            <button
+                                                onClick={() => handleDelete(user.id)}
+                                                className="text-red-500 hover:text-red-700 cursor-pointer"
                                             >
-                                                <FaTrash className="text-red-500 hover:text-red-700 cursor-pointer" />
-                                            </Link>
+                                                <FaTrash />
+                                            </button>
+
                                         </div>
                                     </td>
                                 </tr>

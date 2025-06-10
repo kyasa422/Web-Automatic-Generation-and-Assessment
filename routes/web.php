@@ -18,14 +18,17 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\PrivateController;
 use Inertia\Inertia;
 
-Route::get('/login', function () {
-    return Inertia::render('Auth/Login', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-})->middleware('guest');
+// Route::get('/login', function () {
+//     return Inertia::render('Auth/Login', [
+//         'canLogin' => Route::has('login'),
+//         'canRegister' => Route::has('register'),
+//         'laravelVersion' => Application::VERSION,
+//         'phpVersion' => PHP_VERSION,
+//     ]);
+// })->middleware('guest');
+
+Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login');
+
 
 Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->middleware('auth', 'web');
 //permision
@@ -241,6 +244,21 @@ Route::delete('/banksoal/{id}', [GuruController::class, 'delete'])->name('bankso
 
 Route::post('/guru/set-ulangan', [GuruController::class, 'setUlangan'])
 ->middleware(['auth','role:Guru']);
+
+Route::get('/guru/set-ulangan/{ulanganSetting}', [GuruController::class, 'editUlanganSetting'])
+->middleware(['auth','role:Guru'])
+->name('guru.ulangan-setting.edit');
+
+
+Route::put('/guru/set-ulangan/{ulanganSetting}', [GuruController::class, 'updateUlanganSetting'])
+->middleware(['auth','role:Guru'])
+->name('guru.ulangan-setting.update');
+
+Route::delete('/guru/set-ulangan/{ulanganSetting}', [GuruController::class, 'destroyUlanganSetting'])
+->middleware(['auth','role:Guru'])
+->name('guru.ulangan-setting.destroy');
+
+
 Route::get('/guru/rekapsoal', [GuruController::class, 'rekapsoal'])->name('guru.rekapsoal')
 ->middleware(['auth','role:Guru']);
 

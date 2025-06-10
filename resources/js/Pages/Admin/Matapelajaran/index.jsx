@@ -5,24 +5,49 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 import ModalEditSubject from './ModalEditSubject';
 import ModalCreateSubject from './ModalCreateSubject'; // import komponen baru
 import { useState } from 'react';
+import Swal from 'sweetalert2';
+import { useEffect } from 'react';
+import { router } from '@inertiajs/react'; // jika pakai Inertia.js
 
+const handleDelete = (e, id) => {
+    e.preventDefault();
+
+    Swal.fire({
+        title: 'Apakah Anda yakin?',
+        text: "Data yang dihapus tidak dapat dikembalikan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            router.delete(`/admin/subject/${id}`, {
+                onSuccess: () => {
+                    Swal.fire('Terhapus!', 'Data berhasil dihapus.', 'success');
+                }
+            });
+        }
+    });
+};
 
 
 
 const Subject = () => {
-  const { subjects } = usePage().props;
-  const [selectedSubject, setSelectedSubject] = useState(null);
-  const [showCreateModal, setShowCreateModal] = useState(false);
+    const { subjects } = usePage().props;
+    const [selectedSubject, setSelectedSubject] = useState(null);
+    const [showCreateModal, setShowCreateModal] = useState(false);
 
 
 
 
-  
 
-  return (
-    <DefaultLayout>
 
-<div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+    return (
+        <DefaultLayout>
+
+            <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark">
                 <div className="flex justify-between px-7.5 mb-6">
                     <h4 className="text-xl font-semibold text-black dark:text-white">
                         Mata Pelajaran
@@ -50,35 +75,29 @@ const Subject = () => {
                             {subjects.data.map((item, index) => (
                                 <tr key={item.id} className="border-b border-stroke dark:border-strokedark">
                                     <td className="py-4 px-4 pl-10 text-sm text-black dark:text-white">
-                                        { index + 1}
+                                        {index + 1}
                                     </td>
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
                                         {item.name}
                                     </td>
-                             
-                                  
+
+
                                     <td className="py-4 px-4 text-center">
                                         <div className="flex justify-center gap-3">
-                                        <button
+                                            <button
                                                 onClick={() => setSelectedSubject(item)}
                                             >
                                                 <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer" />
                                             </button>
 
-                                              
-                                            <Link
-                                                href={`/admin/subject/${item.id}`}
-                                                method="delete"
-                                                as="button"
-                                                data={{ id: item.id }}
-                                                onClick={(e) => {
-                                                    if (!confirm("Apakah Anda yakin ingin menghapus data ini?")) {
-                                                        e.preventDefault();
-                                                    }
-                                                }}
+
+                                            <button
+                                                onClick={(e) => handleDelete(e, item.id)}
+                                                className="text-red-500 hover:text-red-700 cursor-pointer"
                                             >
-                                                <FaTrash className="text-red-500 hover:text-red-700 cursor-pointer" />
-                                            </Link>
+                                                <FaTrash />
+                                            </button>
+
                                         </div>
                                     </td>
                                 </tr>
@@ -94,13 +113,13 @@ const Subject = () => {
                     />
                 )}
 
-                 {/* Modal untuk Create */}
-                 {showCreateModal && (
+                {/* Modal untuk Create */}
+                {showCreateModal && (
                     <ModalCreateSubject
                         onClose={() => setShowCreateModal(false)}
                     />
                 )}
-                   {/* Pagination Controls */}
+                {/* Pagination Controls */}
                 {/* <div className="flex justify-center gap-3 mt-4">
                     {userData.prev_page_url && (
                         <Link href={userData.prev_page_url} className="py-2 px-4 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
@@ -115,8 +134,8 @@ const Subject = () => {
                     )}
                 </div> */}
             </div>
-    </DefaultLayout>
-  );
+        </DefaultLayout>
+    );
 };
 
 export default Subject;

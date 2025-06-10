@@ -119,13 +119,11 @@ const DetailJawaban = () => {
             },
             required: ["note"],
         };
-
         const prompt = {
             studentAnswer,
             answerKey,
             cosine,
         };
-
         const response = await model.models.generateContent({
             model: "gemini-2.0-flash",
             contents: [
@@ -133,9 +131,10 @@ const DetailJawaban = () => {
                     role: "user",
                     parts: [
                         {
-                            text: `Buatlah saran atau catatan untuk jawaban siswa berikut:\n\nJawaban Siswa: "${studentAnswer}"\nKunci Jawaban: "${answerKey}"\nSkor Cosine Similarity: ${cosine.toFixed(
-                                4
-                            )}\n\nBerikan catatan singkat dalam bahasa Indonesia.`,
+                            text: `Buatlah saran atau catatan untuk jawaban siswa berikut:\n\n
+                            Jawaban Siswa: "${studentAnswer}"\nKunci Jawaban: 
+                            "${answerKey}"\nSkor Cosine Similarity: ${cosine.toFixed(  4)}\n\n
+                            Berikan catatan singkat dalam bahasa Indonesia.`,
                         },
                     ],
                 },
@@ -155,7 +154,8 @@ const DetailJawaban = () => {
         try {
             const model = new GoogleGenAI({
                 apiKey: "AIzaSyBfeeUiCYcPR_xkHGCPshe2GnN7c_Exd7Y",
-                          generationConfig: {
+                        
+                generationConfig: {
                         temperature: 0.0,
                         topP: 0.95,
                         topK: 1,

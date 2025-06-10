@@ -36,37 +36,37 @@ class GuruController extends Controller
             'questions' => $questions,
         ]);
     }
-public function delete($id)
-{
-    $question = Question::findOrFail($id);
+    public function delete($id)
+    {
+        $question = Question::findOrFail($id);
 
-    if ($question->teacherId !== auth()->user()->id) {
-        return response()->json(['message' => 'Unauthorized'], 403);
+        if ($question->teacherId !== auth()->user()->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $question->delete();
+
+        return response()->json(['message' => 'Soal berhasil dihapus.']);
     }
-
-    $question->delete();
-
-    return response()->json(['message' => 'Soal berhasil dihapus.']);
-}
 
 
 
     public function generatesoal(Request $request): Response
     {
-             $subject = Subject::select("id", "name")
+        $subject = Subject::select("id", "name")
             ->orderBy("name", "asc")
             ->get();
-        return Inertia::render('Guru/Generate/soalesaipdf',[
+        return Inertia::render('Guru/Generate/soalesaipdf', [
             'subject' => $subject,
         ]);
 
-         
+
 
     }
 
     public function store(Request $request)
     {
-                // dd($request->all());
+        // dd($request->all());
         $totalBobot = collect($request->response)->sum(function ($item) {
             return floatval($item['bobot'] ?? 0);
         });
@@ -120,45 +120,45 @@ public function delete($id)
 
     public function storepdf(Request $request)
     {
-       // Validasi total bobot
-    $totalBobot = collect($request->response)->sum(function ($item) {
-        return floatval($item['bobot'] ?? 0);
-    });
+        // Validasi total bobot
+        $totalBobot = collect($request->response)->sum(function ($item) {
+            return floatval($item['bobot'] ?? 0);
+        });
 
-    if ($totalBobot > 100) {
-        return response()->json([
-            'message' => 'Total bobot tidak boleh lebih dari 100.'
-        ], 422);
-    }
+        if ($totalBobot > 100) {
+            return response()->json([
+                'message' => 'Total bobot tidak boleh lebih dari 100.'
+            ], 422);
+        }
 
-    try {
-        DB::transaction(function () use ($request) {
-            $question = Question::create([
-                'teacherId' => auth()->user()->id,
-                'subjectId' => $request->subjectId,
-                'classLevel' => $request->classLevel,
-                'examLevel' => $request->examLevel,
-            ]);
-
-            foreach ($request->response as $row) {
-                $questionInquiry = QuestionInquiry::create([
-                    'questionId' => $question->id,
-                    'question' => $row['question'],
-                    'answer' => $row['type'] === "ESSAY" ? $row['answer'] : null,
-                    'bobot' => $row['bobot'],
+        try {
+            DB::transaction(function () use ($request) {
+                $question = Question::create([
+                    'teacherId' => auth()->user()->id,
+                    'subjectId' => $request->subjectId,
+                    'classLevel' => $request->classLevel,
+                    'examLevel' => $request->examLevel,
                 ]);
 
-                if ($row['type'] === 'MULTIPLE_CHOICE') {
-                    foreach ($row['multipleChoice'] as $choice) {
-                        MultipleChoice::create([
-                            'questionInquiryId' => $questionInquiry->id,
-                            'isCorrect' => $choice['isCorrect'],
-                            'text' => $choice['text'],
-                        ]);
+                foreach ($request->response as $row) {
+                    $questionInquiry = QuestionInquiry::create([
+                        'questionId' => $question->id,
+                        'question' => $row['question'],
+                        'answer' => $row['type'] === "ESSAY" ? $row['answer'] : null,
+                        'bobot' => $row['bobot'],
+                    ]);
+
+                    if ($row['type'] === 'MULTIPLE_CHOICE') {
+                        foreach ($row['multipleChoice'] as $choice) {
+                            MultipleChoice::create([
+                                'questionInquiryId' => $questionInquiry->id,
+                                'isCorrect' => $choice['isCorrect'],
+                                'text' => $choice['text'],
+                            ]);
+                        }
                     }
                 }
-            }
-        });
+            });
 
             return back()->with('success', "Berhasil membuat soal!");
         } catch (\Exception $e) {
@@ -171,7 +171,7 @@ public function delete($id)
     }
     public function soalesai(Request $request): Response
     {
-        $subject = Subject::select("id", "name")    
+        $subject = Subject::select("id", "name")
             ->orderBy("name", "asc")
             ->get();
         return Inertia::render('Guru/Generate/soalesai', [
@@ -234,7 +234,9 @@ public function delete($id)
             ->with([
                 'question' => function ($q) {
                     $q->with(['subject:id,name', 'teacher:id,name']);
-                }
+                },
+                'permissions.permission', // eager load permission di dalam permissions
+
             ])
             ->withCount([
                 'ulanganJawabanMany' => function ($query) {
@@ -246,6 +248,70 @@ public function delete($id)
         return Inertia::render('Guru/Rekap/index', [
             'examSettings' => $examSeetings,
         ]);
+    }
+    public function updateUlanganSetting(Request $request, $id)
+    {
+        $request->validate([
+            'question_id' => 'required|exists:questions,id',
+            'start_time' => 'required|date',
+            'end_time' => 'required|date|after:start_time',
+            'permissions' => 'required|array',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $setting = UlanganSetting::where('id', $id)
+                ->where('created_by', auth()->id())
+                ->firstOrFail();
+
+            // Update nilai utama
+            $setting->update([
+                'question_id' => $request->question_id,
+                'start_time' => $request->start_time,
+                'end_time' => $request->end_time,
+            ]);
+
+            // Hapus permissions lama
+            UlanganPermission::where('ulangan_setting_id', $setting->id)->delete();
+
+            // Tambahkan permission baru
+            foreach ($request->permissions as $permissionId) {
+                UlanganPermission::create([
+                    'ulangan_setting_id' => $setting->id,
+                    'permission_id' => $permissionId,
+                ]);
+            }
+
+            DB::commit();
+return redirect()->route('guru.rekapsoal')->with('success', 'Pengaturan berhasil diperbarui.');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->with('error', 'Gagal memperbarui pengaturan ulangan: ' . $e->getMessage());
+        }
+    }
+
+
+    public function editUlanganSetting($id)
+    {
+        $setting = UlanganSetting::with('permissions')->findOrFail($id);
+
+        return Inertia::render('Guru/Rekap/Edit', [
+            'setting' => $setting,
+            'all_permissions' => Permission::all(['id', 'name']),
+        ]);
+    }
+
+
+    public function destroyUlanganSetting($id)
+    {
+        $setting = UlanganSetting::where('id', $id)
+            ->where('created_by', auth()->id())
+            ->firstOrFail();
+
+        $setting->delete();
+
+        return back()->with('success', 'Ulangan berhasil dihapus.');
     }
 
 

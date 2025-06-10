@@ -3,10 +3,36 @@ import { usePage } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { Link } from "@inertiajs/react";
+import Swal from 'sweetalert2';
+import { useEffect } from 'react';
+import { router } from '@inertiajs/react'; // jika pakai Inertia.js
 
 const AdminUsers = () => {
 
     const { adminData } = usePage().props;
+    const handleDelete = (id) => {
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: 'Data ini akan dihapus permanen!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(`/admin/userssiswa/${id}`, {
+                    onSuccess: () => {
+                        Swal.fire('Berhasil!', 'Data telah dihapus.', 'success');
+                    },
+                    onError: () => {
+                        Swal.fire('Gagal!', 'Terjadi kesalahan saat menghapus.', 'error');
+                    }
+                });
+            }
+        });
+    };
 
 
 
@@ -25,7 +51,7 @@ const AdminUsers = () => {
                             </button>
                         </Link>
                     </div>
-            
+
                 </div>
 
                 <div className="overflow-x-auto">
@@ -39,48 +65,42 @@ const AdminUsers = () => {
                                 <th className="py-4 px-4 text-center text-sm font-medium text-black dark:text-white">Actions</th>
                             </tr>
                         </thead>
-                             <tbody>
-                                     {adminData.data.map((user, index) => (
-                                                    <tr key={user.id} className="border-b border-stroke dark:border-strokedark">
-                                                        <td className="py-4 px-4 pl-10 text-sm text-black dark:text-white">
-                                                            {adminData.from + index}
-                                                        </td>
-                                                        <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                                            {user.name}
-                                                        </td>
-                                                        <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                                            {user.email}
-                                                        </td>
-                                                        <td className="py-4 px-4 text-sm text-black dark:text-white">
-                                                            {user.roles.map((role) => (
-                                                                <span key={role.id} className="mr-2">
-                                                                    {role.name}
-                                                                </span>
-                                                            ))}
-                                                        </td>
-                                                        <td className="py-4 px-4 text-center">
-                                                            <div className="flex justify-center gap-3">
-                                                                <Link href={`/admin/users/${user.id}/edit`}>
-                                                                    <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer" />
-                                                                </Link>
-                                                                <Link
-                                                                    href={`/admin/users/${user.id}`}
-                                                                    method="delete"
-                                                                    as="button"
-                                                                    data={{ id: user.id }}
-                                                                    onClick={(e) => {
-                                                                        if (!confirm("Dengan Perhatian! Jika anda menghapus data ini, maka data yang berhubungan dengan data ini juga akan terhapus. Apakah anda yakin?")) {
-                                                                            e.preventDefault();
-                                                                        }
-                                                                    }}
-                                                                >
-                                                                    <FaTrash className="text-red-500 hover:text-red-700 cursor-pointer" />
-                                                                </Link>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
+                        <tbody>
+                            {adminData.data.map((user, index) => (
+                                <tr key={user.id} className="border-b border-stroke dark:border-strokedark">
+                                    <td className="py-4 px-4 pl-10 text-sm text-black dark:text-white">
+                                        {adminData.from + index}
+                                    </td>
+                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                        {user.name}
+                                    </td>
+                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                        {user.email}
+                                    </td>
+                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                        {user.roles.map((role) => (
+                                            <span key={role.id} className="mr-2">
+                                                {role.name}
+                                            </span>
+                                        ))}
+                                    </td>
+                                    <td className="py-4 px-4 text-center">
+                                        <div className="flex justify-center gap-3">
+                                            <Link href={`/admin/users/${user.id}/edit`}>
+                                                <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer" />
+                                            </Link>
+                                            <button
+                                                onClick={() => handleDelete(user.id)}
+                                                className="text-red-500 hover:text-red-700 cursor-pointer"
+                                            >
+                                                <FaTrash />
+                                            </button>
+
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
                     </table>
                 </div>
             </div>

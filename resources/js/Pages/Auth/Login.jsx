@@ -5,6 +5,10 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import TextInput from "@/Components/TextInput";
 import GuestLayout from "@/Layouts/GuestLayout";
 import { Head, Link, useForm } from "@inertiajs/react";
+import Swal from 'sweetalert2';
+
+import { useEffect } from 'react';
+
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -20,6 +24,17 @@ export default function Login({ status, canResetPassword }) {
             onFinish: () => reset("password"),
         });
     };
+    // ... di dalam komponen Login:
+useEffect(() => {
+    if (errors.email) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Login Gagal',
+            text: errors.email,
+        });
+    }
+}, [errors.email]);
+
 
     return (
         <div className="md:p-40 p-5">
@@ -219,6 +234,8 @@ export default function Login({ status, canResetPassword }) {
                                             </svg>
                                         </span>
                                     </div>
+        <InputError message={errors.email} className="mt-2" />
+
                                 </div>
 
                                 <div className="mb-6">
@@ -233,7 +250,7 @@ export default function Login({ status, canResetPassword }) {
                                             autoComplete="current-password"
                                             onChange={(e) => setData('password', e.target.value)}
                                             type="password"
-                                            placeholder="6+ Characters, 1 Capital letter"
+                                            placeholder="password"
                                             className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
 
@@ -260,7 +277,8 @@ export default function Login({ status, canResetPassword }) {
                                         </span>
                                     </div>
                                 </div>
-                                <InputError message={errors.password} className="mt-2" />
+        <InputError message={errors.password} className="mt-2" />
+
                                 <button disabled={processing}>
                                     <div className="mb-5">
                                         <input

@@ -26,12 +26,11 @@ use Illuminate\Support\Facades\Log;
 
 class SiswaController extends Controller
 {
-    public function index()
+public function index()
 {
     $user = auth()->user();
-    $userPermissionIds = \Spatie\Permission\Models\Permission::whereIn('name', $user->getPermissionNames())->pluck('id');
-
-    $now = now();
+    $userPermissionIds = $user->permissions->pluck('id');
+    $now = now()->setTimezone('Asia/Jakarta');
 
     $availableExams = UlanganSetting::with(['question.subject', 'question.teacher', 'permissions.permission'])
         ->whereHas('permissions', function ($query) use ($userPermissionIds) {
@@ -41,13 +40,12 @@ class SiswaController extends Controller
         ->where('end_time', '>=', $now)
         ->get();
 
-
-
-    return Inertia::render('Siswa/Index', [
+        return Inertia::render('Siswa/Index', [
         'permissions' => $user->getPermissionNames(),
         'available_exams' => $availableExams,
     ]);
 }
+
 
 public function showUjian(\App\Models\UlanganSetting $ulanganSetting)
 {

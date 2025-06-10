@@ -261,7 +261,9 @@ public function destroy($id): RedirectResponse
     // siswa 
 
     public function indexsiswa(){
-        $userData = User::with('roles')->latest()->paginate(5); 
+$userData = User::with(['roles', 'permissions'])->latest()->paginate(5);
+        // permissions
+         
         return Inertia::render('Admin/Userssiswa/index', [
             'userData' => $userData,
        

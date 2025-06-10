@@ -67,7 +67,7 @@ const menuGroupsAdmin = [
                         </defs>
                     </svg>
                 ),
-                label: "Permisions",
+                label: "Kelas",
                 route: "/permissions",
             },
             {

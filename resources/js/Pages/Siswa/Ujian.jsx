@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useForm, usePage } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
 import lodash from "lodash"
+import Swal from 'sweetalert2';
+
 
 const Ujian = () => {
     const { ulangan } = usePage().props;
@@ -28,30 +30,41 @@ const Ujian = () => {
 
 
     const handleSubmit = () => {
-   
-    
-        if (data.answers.some(e => e.answer == "")) {
-            alert("Silakan isi jawaban sebelum mengumpulkan.");
-            return;
-        }
-        
-
-    
-        post(route('siswa.ujian.submit', ulangan.id), {
-            onSuccess: (response) => {
-                console.log("Berhasil kirim:", response);
-                // Redirect or show success message here
-            },
-            onError: (errors) => {
-                console.error("Ada error:", errors);
-            },
-            onFinish: () => {
-                console.log("Selesai kirim");
-            }
+    if (data.answers.some(e => e.answer == "")) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Oops!',
+            text: 'Silakan isi semua jawaban sebelum mengumpulkan.',
         });
-    
-    
-    };
+        return;
+    }
+
+    post(route('siswa.ujian.submit', ulangan.id), {
+        onSuccess: () => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: 'Jawaban Anda telah berhasil dikumpulkan.',
+                confirmButtonText: 'OK',
+            }).then(() => {
+                // Opsional: redirect ke halaman lain
+                window.location.href = route('siswa.dashboard'); // ganti sesuai rute
+            });
+        },
+        onError: (errors) => {
+            console.error("Ada error:", errors);
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: 'Terjadi kesalahan saat mengirim jawaban.',
+            });
+        },
+        onFinish: () => {
+            console.log("Selesai kirim");
+        }
+    });
+};
+
 
     return (
         <DefaultLayout>
