@@ -22,6 +22,7 @@ class CreateAdminUserSeeder extends Seeder
         // ]);
         
         // $role = Role::create(['name' => 'Admin']);
+        $role = Role::create(['name' => 'Admin']);
         $role = Role::create(['name' => 'Guru']);
         $role = Role::create(['name' => 'Siswa']);
 
