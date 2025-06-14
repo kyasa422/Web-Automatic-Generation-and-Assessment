@@ -282,10 +282,10 @@ Route::get('/siswa/hasil-ujian/{assessment}', [SiswaController::class, 'showAsse
 });
 // Route::get('/siswa/ujian/{ulanganSetting}/result', [SiswaController::class, 'showResult'])->name('siswa.ujian.result'); 
 
-
-Route::get('/', function () {
-    return Inertia::render('Albri');
-});
+Route::redirect('/', '/login');
+// Route::get('/', function () {
+//     return Inertia::render('Albri');
+// });
 
 // Route::get('/users', function () {
 
