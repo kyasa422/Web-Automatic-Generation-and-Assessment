@@ -31,8 +31,9 @@ class HandleInertiaRequests extends Middleware
     {
         return array_merge(parent::share($request), [
             'env' => [
-                'GEMINI_API_KEY' => env('GEMINI_API_KEY'),
-                'GEMINI_MODEL_NAME' => env('GEMINI_MODEL_NAME'),
+                'GEMINI_API_KEY' => "AIzaSyDc0ugXTHctmxoaMBfBirfaiA15Vgjuobw",
+                'GEMINI_MODEL_NAME' => "gemini-2.0-flash",
+                'MODEL_API_URL' => env('MODEL_API_URL'),
             ],
             'auth' => [
                 'user' => $request->user() ? $request->user()->load('roles', 'permissions') : null,

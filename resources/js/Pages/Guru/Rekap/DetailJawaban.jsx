@@ -10,7 +10,7 @@ import Swal from "sweetalert2";
 import { RiAiGenerate2 } from "react-icons/ri";
 
 const DetailJawaban = () => {
-    const { ulanganSettings } = usePage().props;
+    const { ulanganSettings, env: { MODEL_API_URL } } = usePage().props;
     const [isLoading, setIsLoading] = useState(null);
     const [edit, setEdit] = useState(null);
     const [score, setScore] = useState(null);
@@ -51,7 +51,7 @@ const DetailJawaban = () => {
         const item = data.detail[index];
         setIsLoading(`COSINE_${index}`);
         try {
-            const response = await fetch("http://localhost:9000/score", {
+            const response = await fetch(`${MODEL_API_URL}/score`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
