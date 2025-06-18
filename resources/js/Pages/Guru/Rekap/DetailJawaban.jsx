@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, usePage } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
 import { GoogleGenAI } from "@google/genai";
@@ -36,7 +36,7 @@ const DetailJawaban = () => {
 
     const totalScore = data.detail.reduce(
         (sum, item) =>
-            sum + (item.score !== null ? item.score * item.bobot : 0),
+            sum + (item.score != null ? item.score * item.bobot : 0),
         0
     );
 
@@ -260,7 +260,7 @@ const DetailJawaban = () => {
 
     const changeNote = (index, note) => {
         const temp = [...data.detail];
-        temp[index].note = note;
+        temp[index].note = note.length == 0 ? "Tanpa Catatan" : note;
         setData((prev) => ({ ...prev, detail: temp }));
     };
 
@@ -320,6 +320,10 @@ const DetailJawaban = () => {
             },
         });
     };
+
+    useEffect(() => {
+        console.log(edit)
+    },[edit])
 
     return (
         <DefaultLayout>
@@ -635,9 +639,9 @@ const DetailJawaban = () => {
                             </div>
 
                             {/* Catatan */}
-                            {item.note && item.multipleChoice.length === 0 && (
+                            {item.note && item.multipleChoice.length == 0 && (
                                 <div className="mt-2 flex justify-between items-start gap-4">
-                                    {edit === index ? (
+                                    {edit == index ? (
                                         <textarea
                                             className="textarea textarea-bordered w-full rounded-md border border-gray-300 p-2 text-gray-700"
                                             defaultValue={item.note}

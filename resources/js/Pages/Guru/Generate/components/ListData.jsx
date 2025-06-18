@@ -183,14 +183,14 @@ const ListData = () => {
                                         <span>Pertanyaan:</span>
                                         {
                                             edit != null && edit.index == index ?
-                                                <input type="text" className="input input-bordered input-sm" value={edit.question} name="question" onChange={handleChange} /> :
+                                                <input type="text" className="input input-bordered input-sm w-full" value={edit.question} name="question" onChange={handleChange} /> :
                                                 <span className="font-normal">{e.question}</span>
                                         }
                                     </p>
 
                                     {
                                         e.answerType === "ESSAY" ? edit != null && edit.index == index ?
-                                            <input type="text" className="input input-bordered input-sm" name="answer" onChange={handleChange} value={edit.answer} /> :
+                                            <textarea type="text" className="textarea textarea-bordered textarea-sm w-full rounded-xl" name="answer" onChange={handleChange} value={edit.answer} /> :
                                             <p className="font-medium">Jawaban: <span className="font-normal">{e.answer}</span></p> : <>
                                             <p className="font-medium mb-1">Pilihan:</p>
                                             <ul className="list-disc ml-6">
