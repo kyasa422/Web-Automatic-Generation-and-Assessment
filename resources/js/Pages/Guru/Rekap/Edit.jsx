@@ -11,7 +11,7 @@ const Edit = () => {
     question_id: setting.question_id,
     start_time: setting.start_time,
     end_time: setting.end_time,
-    permissions: setting.permissions.map(p => p.permission_id), // ambil hanya ID
+    permissions: setting.permissions.map(p => parseInt(p.permission_id)), // ambil hanya ID
   });
 
   console.log(all_permissions)
@@ -19,7 +19,7 @@ const Edit = () => {
 
 
   const handlePermissionChange = (e) => {
-    const id = e.target.value.toString();
+    const id = parseInt(e.target.value);
     if (e.target.checked) {
       setData('permissions', [...data.permissions, id]);
     } else {
@@ -86,7 +86,7 @@ const Edit = () => {
                 <input
                   type="checkbox"
                   value={permission.id}
-                  checked={data.permissions.includes(permission.id.toString())}
+                  checked={data.permissions.includes(parseInt(permission.id))}
                   onChange={handlePermissionChange}
                 />
                 <span>{permission.name}</span>
