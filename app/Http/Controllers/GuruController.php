@@ -41,7 +41,7 @@ class GuruController extends Controller
         
         try{
             $question = Question::find($id);
-        if ($question->teacherId !== auth()->user()->id) {
+        if ($question->teacherId != auth()->user()->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
