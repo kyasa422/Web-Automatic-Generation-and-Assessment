@@ -92,7 +92,7 @@ const DetailJawaban = () => {
             setData((prev) => ({
                 ...prev,
                 detail: temp,
-                nilai: totalScore.toFixed(2),
+                nilai: totalScore?.toFixed(2),
             }));
         } catch (error) {
             console.error("Error scoring:", error);
@@ -133,7 +133,7 @@ const DetailJawaban = () => {
                         {
                             text: `Buatlah saran atau catatan untuk jawaban siswa berikut:\n\n
                             Jawaban Siswa: "${studentAnswer}"\nKunci Jawaban: 
-                            "${answerKey}"\nSkor Cosine Similarity: ${cosine.toFixed(  4)}\n\n
+                            "${answerKey}"\nSkor Cosine Similarity: ${cosine?.toFixed(  4)}\n\n
                             Berikan catatan singkat dalam bahasa Indonesia.`,
                         },
                     ],
@@ -242,7 +242,7 @@ const DetailJawaban = () => {
             setData((prev) => ({
                 ...prev,
                 detail: temp,
-                nilai: totalScore.toFixed(2), // atau parseFloat kalau ingin float asli
+                nilai: totalScore?.toFixed(2), // atau parseFloat kalau ingin float asli
             }));
             console.log("berhasil", jsonParse.response);
         } catch (e) {
@@ -282,7 +282,7 @@ const DetailJawaban = () => {
         setData((prev) => ({
             ...prev,
             detail: temp,
-            nilai: totalScore.toFixed(2),
+            nilai: totalScore?.toFixed(2),
         }));
     };
 
@@ -456,7 +456,7 @@ const DetailJawaban = () => {
                                         ) : (
                                             <span className="font-semibold">
                                                 {item.score !== null
-                                                    ? item.score.toFixed(2)
+                                                    ? item.score?.toFixed(2)
                                                     : "Belum ada"}
                                             </span>
                                         )}
@@ -485,7 +485,7 @@ const DetailJawaban = () => {
                                             {item.score !== null
                                                 ? (
                                                     item.bobot * item.score
-                                                ).toFixed(2)
+                                                )?.toFixed(2)
                                                 : "Belum ada"}
                                         </span>
                                     </p>
@@ -685,8 +685,8 @@ const DetailJawaban = () => {
 
                 {data.detail.length > 0 && (
                     <div className=" p-6 bg-slate-50 border border-blue-200 rounded-lg shadow-inner text-green-800 text-lg font-semibold text-center">
-                        Total Nilai Akhir: {totalScore.toFixed(2)} dari{" "}
-                        {maxScore.toFixed(2)}
+                        Total Nilai Akhir: {totalScore?.toFixed(2)} dari{" "}
+                        {maxScore?.toFixed(2)}
                         <button
                             className="btn btn-md btn-ghost bg-blue-500 text-white ml-5 gap-2"
                             onClick={submitAssessment}
