@@ -86,7 +86,7 @@ const Edit = () => {
                 <input
                   type="checkbox"
                   value={permission.id}
-                  defaultChecked={data.permissions.includes(Number(permission.id))}
+                  defaultChecked={data.permissions.find(e => e.id == parseInt(permission)) != null}
                   onChange={handlePermissionChange}
                 />
                 <span>{permission.name}</span>
