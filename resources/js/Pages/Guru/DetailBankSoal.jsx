@@ -78,7 +78,7 @@ const DetailBankSoal = () => {
                     key={mc.id}
                     className={mc.isCorrect === 1 ? "text-green-600 font-semibold" : ""}
                   >
-                    {mc.text} {mc.isCorrect === 1 ? "(Benar)" : ""}
+                    {mc.text} { mc.isCorrect } {mc.isCorrect === 1 ? "(Benar)" : ""}
                   </li>
                 ))}
               </ul>
