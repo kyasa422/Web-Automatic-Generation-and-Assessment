@@ -21,35 +21,45 @@ const handleDelete = (id) => {
     cancelButtonText: "Batal",
   }).then(async (result) => {
     if (result.isConfirmed) {
-      try {
-        await axios.delete(route("banksoal.delete", id));
-        swal.fire({
-          icon: "success",
-          title: "Berhasil",
-          text: "Soal berhasil dihapus",
-          toast: true,
-          timer: 2000,
-          position: "top-end",
-          showConfirmButton: false,
-        });
-
-        // Refresh halaman (opsional)
-        window.location.reload();
-      } catch (error) {
-        if (error.response && error.response.status === 403) {
+      router.delete(route("banksoal.delete", id), {
+        onSuccess: () => {
+          swal.fire({
+            icon: "success",
+            title: "Berhasil",
+            text: "Soal berhasil dihapus",
+            toast: true,
+            timer: 2000,
+            position: "top-end",
+            showConfirmButton: false,
+          });
+        },
+        onError: () => {
           swal.fire({
             icon: "error",
             title: "Akses Ditolak",
             text: "Anda tidak memiliki izin untuk menghapus soal ini. hanya user yang membuat soal yang dapat menghapus soal ini.",
           });
-        } else {
-          swal.fire({
-            icon: "error",
-            title: "Gagal",
-            text: "Terjadi kesalahan saat menghapus soal.",
-          });
         }
-      }
+      })
+      // try {
+        
+      //   await axios.delete();
+
+
+      //   // Refresh halaman (opsional)
+      //   window.location.reload();
+      // } catch (error) {
+      //   console.log(error)
+      //   if (error.response && error.response.status === 403) {
+          
+      //   } else {
+      //     swal.fire({
+      //       icon: "error",
+      //       title: "Gagal",
+      //       text: "Terjadi kesalahan saat menghapus soal.",
+      //     });
+      //   }
+      // }
     }
   });
 };
@@ -94,28 +104,28 @@ const BankSoal = () => {
                       href={route("banksoal.show", q.id)}
                       className="inline-block text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
                     >
-                                        <span className="inline-flex items-center space-x-1 ">
+                      <span className="inline-flex items-center space-x-1 ">
 
-                                        <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer mr-1" />
-                    
-                      Siapkan Ujian
-                                        </span>
+                        <FaEdit className="text-yellow-500 hover:text-yellow-700 cursor-pointer mr-1" />
+
+                        Siapkan Ujian
+                      </span>
                     </Link>
 
 
                     <button
-                    onClick={() => handleDelete(q.id)}
-                    className="inline-block text-sm bg-slate-700 text-gray-100 px-3 py-1 rounded hover:bg-red-700 transition ml-3"
-                  >
-                    <span className="inline-flex items-center space-x-1">
-                      <FaTrash className="text-red-500 hover:text-slate-100" />
-                      <span>Delete</span>
-                    </span>
-                  </button>
+                      onClick={() => handleDelete(q.id)}
+                      className="inline-block text-sm bg-slate-700 text-gray-100 px-3 py-1 rounded hover:bg-red-700 transition ml-3"
+                    >
+                      <span className="inline-flex items-center space-x-1">
+                        <FaTrash className="text-red-500 hover:text-slate-100" />
+                        <span>Delete</span>
+                      </span>
+                    </button>
 
 
-      
-                 
+
+
                   </td>
                 </tr>
               ))}

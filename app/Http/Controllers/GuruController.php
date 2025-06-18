@@ -38,8 +38,10 @@ class GuruController extends Controller
     }
     public function delete($id)
     {
-        $question = Question::findOrFail($id);
-        dd($question);
+        
+        try{
+            $question = Question::find($id);
+            dd(auth()->user());
 
         if ($question->teacherId !== auth()->user()->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
@@ -48,6 +50,10 @@ class GuruController extends Controller
         $question->delete();
 
         return response()->json(['message' => 'Soal berhasil dihapus.']);
+        }catch(\Exception $e){
+            dd($e);
+            return response()->json(['message' => 'Ada kesalahan pada server!'], 403);
+        }
     }
 
 
