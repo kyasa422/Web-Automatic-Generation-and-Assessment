@@ -11,20 +11,9 @@ const Edit = () => {
     question_id: setting.question_id,
     start_time: setting.start_time,
     end_time: setting.end_time,
-    permissions: [], // kosongkan dulu
+    permissions: setting.permissions.map(p => p.permission_id), // ambil hanya ID
   });
 
-  useEffect(() => {
-    if (setting && setting.permissions && setting.permissions.length > 0) {
-      const permissionIds = setting.permissions.map(p => p.permission_id);
-      console.log('Setting permissions:', permissionIds);
-      setData('permissions', permissionIds);
-    }
-  }, [setting, setting?.permissions]);
-
-  // Debug log untuk melihat data.permissions
-  console.log('Current data.permissions:', data.permissions);
-  console.log('Setting permissions:', setting?.permissions);
 
   const handlePermissionChange = (e) => {
     const id = parseInt(e.target.value);
@@ -89,23 +78,17 @@ const Edit = () => {
         <div>
           <label className="block text-sm font-medium">Izin Kelas</label>
           <div className="space-y-1">
-            {all_permissions.map((permission) => {
-              // Fallback logic untuk checked state
-              const isChecked = data.permissions && data.permissions.includes(permission.id) || 
-                               (setting.permissions && setting.permissions.some(p => p.permission_id === permission.id));
-              
-              return (
-                <label key={permission.id} className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    value={permission.id}
-                    checked={isChecked}
-                    onChange={handlePermissionChange}
-                  />
-                  <span>{permission.name}</span>
-                </label>
-              );
-            })}
+            {all_permissions.map((permission) => (
+              <label key={permission.id} className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  value={permission.id}
+                  defaultChecked={data.permissions.includes(permission.id)}
+                  onChange={handlePermissionChange}
+                />
+                <span>{permission.name}</span>
+              </label>
+            ))}
           </div>
           {errors.permissions && <p className="text-red-500 text-sm">{errors.permissions}</p>}
         </div>
