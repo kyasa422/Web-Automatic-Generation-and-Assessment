@@ -19,7 +19,7 @@ const Edit = () => {
 
 
   const handlePermissionChange = (e) => {
-    const id = parseInt(e.target.value);
+    const id = e.target.value.toString();
     if (e.target.checked) {
       setData('permissions', [...data.permissions, id]);
     } else {
