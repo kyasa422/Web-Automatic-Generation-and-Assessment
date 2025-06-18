@@ -39,6 +39,7 @@ class GuruController extends Controller
     public function delete($id)
     {
         $question = Question::findOrFail($id);
+        dd($quetion);
 
         if ($question->teacherId !== auth()->user()->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
