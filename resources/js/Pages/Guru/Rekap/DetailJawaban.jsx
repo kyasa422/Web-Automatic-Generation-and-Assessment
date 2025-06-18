@@ -622,13 +622,13 @@ const DetailJawaban = () => {
                                         <li
                                             key={i}
                                             className={
-                                                choice.isCorrect
+                                                choice.isCorrect == 1
                                                     ? "text-green-600 font-semibold"
                                                     : ""
                                             }
                                         >
                                             {choice.text}{" "}
-                                            {choice.isCorrect ? "(Benar)" : ""}
+                                            {choice.isCorrect == 1 ? "(Benar)" : ""}
                                         </li>
                                     ))}
                                 </ul>
