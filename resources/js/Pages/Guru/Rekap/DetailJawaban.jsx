@@ -685,8 +685,8 @@ const DetailJawaban = () => {
 
                 {data.detail.length > 0 && (
                     <div className=" p-6 bg-slate-50 border border-blue-200 rounded-lg shadow-inner text-green-800 text-lg font-semibold text-center">
-                        Total Nilai Akhir: {totalScore ? totalScore.toFixed(2) : 0} dari{" "}
-                        {maxScore ? maxScore.toFixed(2) : 0}
+                        Total Nilai Akhir: {totalScore ?  parseFloat(totalScore).toFixed(2) : 0} dari{" "}
+                        {maxScore ? parseFloat(maxScore).toFixed(2) : 0}
                         <button
                             className="btn btn-md btn-ghost bg-blue-500 text-white ml-5 gap-2"
                             onClick={submitAssessment}
