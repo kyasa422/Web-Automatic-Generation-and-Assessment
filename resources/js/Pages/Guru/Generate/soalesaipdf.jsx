@@ -426,6 +426,7 @@ const Esai = () => {
                                     Jumlah Soal Esai
                                 </label>
                                 <select
+                                required
                                     className="select select-bordered w-full"
                                     value={data.jumlahSoalEsai}
                                     onChange={handleChange}
@@ -448,6 +449,7 @@ const Esai = () => {
                                     Jumlah Soal Pilihan Ganda
                                 </label>
                                 <select
+                                required
                                     className="select select-bordered w-full"
                                     value={data.jumlahSoalPG}
                                     onChange={handleChange}
@@ -470,10 +472,10 @@ const Esai = () => {
                                     Upload Materi (PDF/Docx/Txt)
                                 </label>
                                 <input
+                                    required
                                     type="file"
                                     accept=".pdf,.docx,.doc,.txt"
                                     onChange={handleFileUpload}
-                                    required
                                     className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                 />
                                 {uploadedFile && (
@@ -489,6 +491,7 @@ const Esai = () => {
                                     Kelas
                                 </label>
                                 <select
+                                required
                                     className="select select-bordered w-full"
                                     value={data.kelas}
                                     onChange={handleChange}
@@ -509,6 +512,7 @@ const Esai = () => {
                                     Mata Pelajaran
                                 </label>
                                 <select
+                                required
                                     className="select select-bordered w-full"
                                     value={data.mapel}
                                     onChange={handleChange}
@@ -531,6 +535,7 @@ const Esai = () => {
                                     Tingkat Ujian
                                 </label>
                                 <select
+                                required
                                     className="select select-bordered w-full"
                                     value={data.tingkat}
                                     onChange={handleChange}
@@ -554,6 +559,7 @@ const Esai = () => {
                                     Tingkat Kesulitan
                                 </label>
                                 <select
+                                required
                                     className="select select-bordered w-full"
                                     value={data.kesulitan}
                                     onChange={handleChange}
@@ -677,6 +683,7 @@ const Esai = () => {
                                                                     <span>{item.bobot ?? 1}</span>
                                                                 ) : (
                                                                     <input
+                                                                        required
                                                                         type="number"
                                                                         min="1"
                                                                         className="input input-sm input-bordered w-24"
@@ -711,6 +718,7 @@ const Esai = () => {
                                                     <span>{item.question}</span>
                                                 ) : (
                                                     <input
+                                                        required
                                                         className="input input-sm input-bordered w-full"
                                                         onChange={(e) =>
                                                             handleChangeQuestion(
@@ -754,6 +762,7 @@ const Esai = () => {
                                                                             choice.text
                                                                         ) : (
                                                                             <input
+                                                                                required
                                                                                 className="input input-sm input-bordered w-full"
                                                                                 onChange={(
                                                                                     e
@@ -791,6 +800,7 @@ const Esai = () => {
                                                         </span>
                                                     ) : (
                                                         <input
+                                                            required
                                                             className="input input-sm input-bordered w-full"
                                                             onChange={(e) =>
                                                                 handleChangeQuestion(
