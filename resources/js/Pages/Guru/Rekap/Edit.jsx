@@ -14,6 +14,9 @@ const Edit = () => {
     permissions: setting.permissions.map(p => p.permission_id), // ambil hanya ID
   });
 
+  console.log(all_permissions)
+  console.log(data.permissions)
+
 
   const handlePermissionChange = (e) => {
     const id = parseInt(e.target.value);
