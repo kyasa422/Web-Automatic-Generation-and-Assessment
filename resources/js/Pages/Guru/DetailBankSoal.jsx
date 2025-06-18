@@ -76,9 +76,9 @@ const DetailBankSoal = () => {
                 {inq.multiple_choice.map((mc) => (
                   <li
                     key={mc.id}
-                    className={mc.isCorrect ? "text-green-600 font-semibold" : ""}
+                    className={mc.isCorrect === 1 ? "text-green-600 font-semibold" : ""}
                   >
-                    {mc.text} {mc.isCorrect ? "(Benar)" : ""}
+                    {mc.text} {mc.isCorrect === 1 ? "(Benar)" : ""}
                   </li>
                 ))}
               </ul>
