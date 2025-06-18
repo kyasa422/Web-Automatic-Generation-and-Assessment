@@ -537,7 +537,7 @@ const DetailJawaban = () => {
 
                                                     <RiAiGenerate2 className="text-lg" />
                                                     <span>
-                                                        Koreksi soal i  ni dengan Ai
+                                                        Koreksi soal ini dengan Ai
                                                     </span>
                                                 </>
                                             )}

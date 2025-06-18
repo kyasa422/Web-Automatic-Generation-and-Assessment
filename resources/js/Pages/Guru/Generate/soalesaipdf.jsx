@@ -258,11 +258,12 @@ const Esai = () => {
         setLoadingRegenerate(index);
         try {
             let contents = {
-                subject: subject.find((e) => e.id === data.mapel).name,
+                subject: subject.find((e) => e.id == data.mapel).name,
                 classLevel: data.kelas,
                 educationLevel: "vocational high school",
                 language: "indonesia",
                 questionDifficultyLevel: data.kesulitan,
+                materi: fileContent.substring(0, 50000)
             };
 
             let responseSchema;
@@ -314,6 +315,7 @@ const Esai = () => {
                 model: "gemini-2.0-flash",
                 contents: JSON.stringify(contents),
                 config: {
+                    maxOutputTokens: 1000,
                     responseMimeType: "application/json",
                     responseSchema: responseSchema,
                 },

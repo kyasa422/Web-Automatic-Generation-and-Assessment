@@ -1,12 +1,12 @@
 import { FaCheck, FaPencilAlt, FaStar, FaTrash } from "react-icons/fa";
 import { RiAiGenerate2 } from "react-icons/ri";
 import { useStore } from "../store/store";
-import { GoogleGenerativeAI } from "@google/generative-ai"
 import { router, useForm, usePage } from "@inertiajs/react";
 import _, { set } from "lodash";
 import { useState } from "react";
 import withReactContent from "sweetalert2-react-content";
 import SweetAlert from "sweetalert2";
+import { GoogleGenAI } from "@google/genai";
 
 const ListData = () => {
     const { env: { GEMINI_API_KEY, GEMINI_MODEL_NAME }, subject } = usePage().props
@@ -79,50 +79,55 @@ const ListData = () => {
     const handleOnClickGenerate = async (index, answerType) => {
         try {
             setIsLoadingStore(`SINGLE-${index}`)
-            const genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
-            const model = genAI.getGenerativeModel({
-                model: GEMINI_MODEL_NAME,
+            const genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY })
+            const subjectName = subject.find(e => e.id == requestStore.subject).name
+            const schema = answerType === "ESSAY"
+                ? {
+                    type: "object",
+                    properties: {
+                        question: { type: "string" },
+                        answer: { type: "string" },
+                        answerType: { type: "string", enum: ["ESSAY"] },
+                        label: { type: "string", enum: ["uraian_terbatas", "uraian_bebas"] }
+                    },
+                    required: ["question", "answer", "answerType", "label"]
+                }
+                : {
+                    type: "object",
+                    properties: {
+                        question: { type: "string" },
+                        answerType: { type: "string", enum: ["MULTIPLE_CHOICE"] },
+                        multipleChoice: {
+                            type: "array",
+                            items: {
+                                type: "object",
+                                properties: {
+                                    text: { type: "string" },
+                                    isCorrect: { type: "boolean" }
+                                },
+                                required: ["text", "isCorrect"]
+                            },
+                            minItems: 4,
+                            maxItems: 4
+                        }
+                    },
+                    required: ["question", "answerType", "multipleChoice"]
+                }
+
+            const prompt = `Buatkan 1 soal berdasarkan parameter berikut:\n- class: ${requestStore.class}\n- subject: ${subjectName}\n- type: ${requestStore.type === 0 ? "Ulangan Tengah Semester" : "Ulangan Akhir Semester"}\n- answerType: ${answerType}\n\n${answerType === "ESSAY" ? "Untuk soal essay, wajib menyertakan atribut label dengan nilai 'uraian_terbatas' atau 'uraian_bebas'." : "Untuk soal pilihan ganda, wajib ada 4 opsi dan satu jawaban benar."}\nJawaban harus dalam format JSON murni, hanya 1 soal, tidak kurang tidak lebih.`
+
+            const result = await genAI.models.generateContent({
+                contents: prompt,
+                model: "gemini-2.5-flash",
+                config: {
+                    responseMimeType: "application/json",
+                    responseSchema: schema,
+                    temperature: .7
+                }
             })
 
-            const subjectName = subject.find(e => e.id == requestStore.subject).name
-            const prompt = `
-        Buatkan 1 soal berdasarkan parameter berikut:  
-        - class: ${requestStore.class} 
-        - subject: ${subjectName}
-        - type: ${requestStore.type === 0 ? "Ulangan Tengah Semester" : "Ulangan Akhir Semester"}
-        - answerType: ${answerType} 
-        
-        Format respons yang HARUS digunakan:
-        
-        - Jika answerType adalah "ESSAY":
-        {
-        "question": "pertanyaan 1",
-        "answer": "jawaban 1",
-        "answerType": "ESSAY",
-        "label": "uraian_terbatas"
-        }
-        
-        - Jika answerType adalah "MULTIPLE_CHOICE":
-        {
-            "question": "pertanyaan 1",
-            "answerType": "MULTIPLE_CHOICE",
-            "multipleChoice": [
-              { "text": "opsi A", "isCorrect": false },
-              { "text": "opsi B", "isCorrect": true },
-              { "text": "opsi C", "isCorrect": false },
-              { "text": "opsi D", "isCorrect": false }
-            ]
-        },
-        
-        Penting:  
-        - Jawaban harus dalam format JSON murni tanpa tambahan teks atau simbol apa pun di awal maupun akhir.  
-        - Jumlah soal wajib 1 — tidak kurang dan tidak lebih.  
-        - Jika answerType adalah "ESSAY", maka wajib menyertakan atribut "label" dengan nilai "uraian_terbatas" atau "uraian_bebas".
-        `;
-
-            const result = await model.generateContent(prompt)
-            const response = JSON.parse(result.response.text())
-            updateResponseByIndexStore(index, response)
+            const response = result.text
+            updateResponseByIndexStore(index, JSON.parse(response))
         } catch (e) {
             console.error(e)
         } finally {
@@ -139,10 +144,10 @@ const ListData = () => {
                         <div className="mt-2 text-right">
                             <strong>Total Bobot: </strong>
                             <span className="text-red-400">
-                            {(responseStore
-                                .map(e => parseFloat(e.weight))
-                                .reduce((a, b) => a + b, 0)
-                            ).toFixed(2)}/100   
+                                {(responseStore
+                                    .map(e => parseFloat(e.weight))
+                                    .reduce((a, b) => a + b, 0)
+                                ).toFixed(2)}/100
                             </span>
                         </div>
                     </div>
@@ -151,7 +156,7 @@ const ListData = () => {
                         responseStore.map((e, index) => <div className="p-6 space-y-6" key={index}>
                             <div className="border p-6 rounded-lg">
                                 <div className="flex justify-between items-center mb-4">
-                                    <h3 className="font-bold">Soal {index + 1} {e.label === "uraian_terbatas" ? <FaStar /> : null}</h3>
+                                    <h3 className="font-bold">Soal {index + 1} {e.label === "uraian_terbatas" ? "" : null}</h3>
                                     <div className="flex items-center gap-3">
                                         <button type="button" className="btn btn-circle btn-sm btn-ghost" onClick={() => handleOnClickQuestionEdit(index)}>
                                             {edit == null || edit.index != index ? <FaPencilAlt /> : <FaCheck />}
