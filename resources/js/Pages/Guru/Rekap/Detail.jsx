@@ -3,6 +3,7 @@ import { usePage } from "@inertiajs/react";
 import DefaultLayout from "@/Layouts/DefaultLayout";
 import { Link } from "@inertiajs/react";
 import moment from "moment";
+import { round } from "lodash";
 
 
 const Detail = () => {
@@ -37,7 +38,7 @@ const Detail = () => {
                   <td className="p-2 border">{item.examLevel ? "Ulangan Tengah Semester" : "Ulangan Akhir Semester"}</td>
                   <td className="p-2 border">{moment(item.created_at).format("DD MMMM YYYY HH:mm")}</td>
                 <td className="p-2 border">
-  {item.nilai !== null ? item.nilai : "Belum dinilai"}
+  {item.nilai !== null ? round(item.nilai) : "Belum dinilai"}
 </td>
 
 
