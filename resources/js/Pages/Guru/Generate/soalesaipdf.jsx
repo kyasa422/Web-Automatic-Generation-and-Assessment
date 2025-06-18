@@ -84,73 +84,73 @@ const Esai = () => {
         }));
     }
 
-   // Asumsikan setUploadedFile, setFileContent, dan mammoth sudah didefinisikan dan diimpor dengan benar
+    // Asumsikan setUploadedFile, setFileContent, dan mammoth sudah didefinisikan dan diimpor dengan benar
 
-const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
 
-    setUploadedFile(file);
+        setUploadedFile(file);
 
-    if (file.type === "application/pdf") {
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-            const arrayBuffer = event.target.result;
-            try {
-                // pdfjsLib dan workerSrc sudah di-setup di luar fungsi ini
-                const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
-                const pdf = await loadingTask.promise;
-                let fullText = "";
+        if (file.type === "application/pdf") {
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                const arrayBuffer = event.target.result;
+                try {
+                    // pdfjsLib dan workerSrc sudah di-setup di luar fungsi ini
+                    const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+                    const pdf = await loadingTask.promise;
+                    let fullText = "";
 
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-                    const pageText = textContent.items.map(item => item.str).join(" ");
-                    fullText += pageText + "\n";
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const textContent = await page.getTextContent();
+                        const pageText = textContent.items.map(item => item.str).join(" ");
+                        fullText += pageText + "\n";
+                    }
+                    setFileContent(fullText.trim());
+                } catch (error) {
+                    console.error("Error parsing PDF:", error);
+                    setFileContent("Error parsing PDF document");
                 }
-                setFileContent(fullText.trim());
-            } catch (error) {
-                console.error("Error parsing PDF:", error);
-                setFileContent("Error parsing PDF document");
-            }
-        };
-        reader.readAsArrayBuffer(file);
-    } else if (
-        file.type ===
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-        file.type === "application/msword"
-    ) {
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-            const arrayBuffer = event.target.result;
-            try {
-                // Pastikan mammoth sudah diimpor dan tersedia
-                if (typeof mammoth === 'undefined') { // Anda mungkin ingin menghapus ini jika impor modul sudah pasti
-                    console.error("Mammoth.js is not loaded.");
-                    setFileContent("Error: Pustaka Mammoth.js tidak ditemukan.");
-                    return;
+            };
+            reader.readAsArrayBuffer(file);
+        } else if (
+            file.type ===
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+            file.type === "application/msword"
+        ) {
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                const arrayBuffer = event.target.result;
+                try {
+                    // Pastikan mammoth sudah diimpor dan tersedia
+                    if (typeof mammoth === 'undefined') { // Anda mungkin ingin menghapus ini jika impor modul sudah pasti
+                        console.error("Mammoth.js is not loaded.");
+                        setFileContent("Error: Pustaka Mammoth.js tidak ditemukan.");
+                        return;
+                    }
+                    const result = await mammoth.extractRawText({
+                        arrayBuffer: arrayBuffer,
+                    });
+                    setFileContent(result.value);
+                } catch (error) {
+                    console.error("Error parsing document:", error);
+                    setFileContent("Error parsing document");
                 }
-                const result = await mammoth.extractRawText({
-                    arrayBuffer: arrayBuffer,
-                });
-                setFileContent(result.value);
-            } catch (error) {
-                console.error("Error parsing document:", error);
-                setFileContent("Error parsing document");
-            }
-        };
-        reader.readAsArrayBuffer(file);
-    } else if (file.type === "text/plain") {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            setFileContent(event.target.result);
-        };
-        reader.readAsText(file);
-    } else {
-        setFileContent("File type not supported for content extraction.");
-        console.warn("Unsupported file type:", file.type);
-    }
-};
+            };
+            reader.readAsArrayBuffer(file);
+        } else if (file.type === "text/plain") {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                setFileContent(event.target.result);
+            };
+            reader.readAsText(file);
+        } else {
+            setFileContent("File type not supported for content extraction.");
+            console.warn("Unsupported file type:", file.type);
+        }
+    };
 
 
     console.log("File content:", fileContent);
@@ -473,6 +473,7 @@ const handleFileUpload = async (e) => {
                                     type="file"
                                     accept=".pdf,.docx,.doc,.txt"
                                     onChange={handleFileUpload}
+                                    required
                                     className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                 />
                                 {uploadedFile && (
@@ -823,15 +824,6 @@ const handleFileUpload = async (e) => {
                                             <span>Simpan</span>
                                         </button>
                                     </div>
-                                </div>
-
-                                <div className="mt-6">
-                                    <h4 className="font-medium mb-2">
-                                        Raw JSON Response:
-                                    </h4>
-                                    <pre className="bg-gray-100 p-4 rounded overflow-auto  dark:bg-gray-800 dark:text-gray-200">
-                                        {JSON.stringify(response, null, 2)}
-                                    </pre>
                                 </div>
                             </>
                         ) : (
