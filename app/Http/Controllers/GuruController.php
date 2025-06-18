@@ -42,15 +42,15 @@ class GuruController extends Controller
         try{
             $question = Question::find($id);
         if ($question->teacherId != auth()->user()->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return back()->with('success','Anda tidak memiliki akses!');
         }
 
         $question->delete();
 
-        return response()->json(['message' => 'Soal berhasil dihapus.']);
+            return back()->with('success','Berhasil dihapus!');
         }catch(\Exception $e){
             dd($e);
-            return response()->json(['message' => 'Ada kesalahan pada server!'], 403);
+            return back()->with('error','Ada kesalahan pada server');
         }
     }
 
