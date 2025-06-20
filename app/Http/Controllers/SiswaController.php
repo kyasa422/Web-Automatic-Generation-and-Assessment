@@ -38,6 +38,11 @@ public function index()
         })
         ->where('start_time', '<=', $now)
         ->where('end_time', '>=', $now)
+        ->withCount([
+            'ulanganJawabanMany' => function ($query) use ($user) {
+                $query->where('user_id', "=", $user->id);
+            }
+        ])
         ->get();
 
         return Inertia::render('Siswa/Index', [

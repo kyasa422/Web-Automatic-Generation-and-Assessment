@@ -12,19 +12,19 @@ const AssessmentDetail = () => {
   console.log(assessment);
   return (
     <DefaultLayout noPadding>
-        <div className="p-6 max-w-5xl mx-auto">
+      <div className="p-6 max-w-5xl mx-auto">
 
-            <h1 className="text-3xl font-bold text-slate-900 mb-6">
-                    Detail Hasil Ujian
-            </h1>
+        <h1 className="text-3xl font-bold text-slate-900 mb-6">
+          Detail Hasil Ujian
+        </h1>
 
         <div className="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-200">
 
-        <p><strong>Nama:</strong> {assessment.user.name}</p>
-        <p><strong>Mata Pelajaran:</strong> {assessment.setting.question.subject.name}</p>
-        <p><strong>Tanggal Ujian:</strong>    {moment((assessment.created_at)
-                                        ).format("DD MMMM YYYY HH:mm")}</p>
-        <p><strong>Nilai:</strong> {assessment.nilai}</p>
+          <p><strong>Nama:</strong> {assessment.user.name}</p>
+          <p><strong>Mata Pelajaran:</strong> {assessment.setting.question.subject.name}</p>
+          <p><strong>Tanggal Ujian:</strong>    {moment((assessment.created_at)
+          ).format("DD MMMM YYYY HH:mm")}</p>
+          <p><strong>Nilai:</strong> {assessment.nilai}</p>
 
 
         </div>
@@ -37,7 +37,7 @@ const AssessmentDetail = () => {
                 key={task.id}
                 className="bg-white border border-gray-200 rounded-2xl shadow-md p-6 mb-6 space-y-4"
               >
-              
+
                 {/* Header */}
                 <div className="flex justify-between flex-wrap gap-4 items-center bg-sky-100 text-sky-800 px-5 py-3 rounded-xl">
                   <div>
@@ -96,28 +96,28 @@ const AssessmentDetail = () => {
                   </ul>
                 </div>
 
-             {/* Kunci Jawaban */}
-<div>
-  <p className="text-gray-800 font-semibold">
-    {inquiry?.multiple_choice?.length ? "Kunci Jawaban PG:" : "Kunci Jawaban Essay:"}
-  </p>
-  <ul className="list-disc pl-5 text-gray-700">
-    {/* Jika essay */}
-    {inquiry?.answer && (
-      <li>{inquiry.answer}</li>
-    )}
+                {/* Kunci Jawaban */}
+                <div>
+                  <p className="text-gray-800 font-semibold">
+                    {inquiry?.multiple_choice?.length ? "Kunci Jawaban PG:" : "Kunci Jawaban Essay:"}
+                  </p>
+                  <ul className="list-disc pl-5 text-gray-700">
+                    {/* Jika essay */}
+                    {inquiry?.answer && (
+                      <li>{inquiry.answer}</li>
+                    )}
 
-    {/* Jika pilihan ganda */}
-    {inquiry?.multiple_choice?.map((choice, i) => (
-      <li
-        key={i}
-        className={choice.isCorrect ? "text-green-600 font-semibold" : ""}
-      >
-        {choice.text} {choice.isCorrect ? "(Benar)" : ""}
-      </li>
-    ))}
-  </ul>
-</div>
+                    {/* Jika pilihan ganda */}
+                    {inquiry?.multiple_choice?.map((choice, i) => (
+                      <li
+                        key={i}
+                        className={choice.isCorrect == 1 ? "text-green-600 font-semibold" : ""}
+                      >
+                        {choice.text} {choice.isCorrect == 1 ? "(Benar)" : ""}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
 
                 {/* Catatan */}
@@ -134,7 +134,7 @@ const AssessmentDetail = () => {
                         <p className="text-gray-700">{task.catatan}</p>
                       </div>
                     )}
-             
+
                   </div>
                 )}
               </div>

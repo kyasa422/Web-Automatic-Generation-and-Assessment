@@ -7,7 +7,6 @@ import { router } from '@inertiajs/react';
 const Laporan = () => {
     const { permissions, available_exams } = usePage().props;
     console.log(available_exams);
-    console.log(permissions);
 
     return (
         <DefaultLayout>
@@ -15,7 +14,7 @@ const Laporan = () => {
                 <h1 className="text-2xl font-bold">Daftar Ujian yang Tersedia</h1>
 
                 {available_exams.length > 0 ? (
-                    available_exams.map((exam,  index) => (
+                    available_exams.map((exam, index) => (
                         <div
                             key={exam.id}
                             className="border border-gray-300 rounded-lg p-4 bg-white shadow-md"
@@ -36,10 +35,10 @@ const Laporan = () => {
                             </p>
                             <button
                                 className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                             onClick={() => router.get('/siswa/ujian/' + exam.id)}
+                                onClick={() => router.get('/siswa/ujian/' + exam.id)}
+                                disabled={exam.ulangan_jawaban_many_count != 0}
                             >
-                                Kerjakan Ujian
-
+                                { exam.ulangan_jawaban_many_count == 0 ? "Kerjakan Ujian" : "Sudah mengerjakan" }
                             </button>
                         </div>
                     ))

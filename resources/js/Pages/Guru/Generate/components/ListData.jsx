@@ -48,7 +48,7 @@ const ListData = () => {
 
     const handleOnClickSubmit = () => {
         const weightTotal = responseStore.map(e => parseFloat(e.weight)).reduce((a, b) => a + b)
-        if (weightTotal != 100) {
+        if (weightTotal.toFixed(2) != 100) {
             Swal.fire({
                 icon: 'warning',
                 title: 'Bobot tidak sesuai',
