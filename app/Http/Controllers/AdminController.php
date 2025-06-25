@@ -15,61 +15,55 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Subject;
 
-
-
-
-
-
-
 class AdminController extends Controller
 {
     public function index(Request $request)
-{
-    $userData = User::with('roles')
-        ->latest()
-        ->paginate(5, ['*'], 'userPage');
+    {
+        $userData = User::with('roles')
+            ->latest()
+            ->paginate(5, ['*'], 'userPage');
 
-    $guruData = User::whereHas('roles', function ($query) {
-        $query->where('name', 'Guru');
-    })
-        ->with(['roles' => function ($query) {
+        $guruData = User::whereHas('roles', function ($query) {
             $query->where('name', 'Guru');
-        }])
-        ->latest()
-        ->paginate(5, ['*'], 'guruPage');
+        })
+            ->with([
+                'roles' => function ($query) {
+                    $query->where('name', 'Guru');
+                }
+            ])
+            ->latest()
+            ->paginate(5, ['*'], 'guruPage');
 
-    // ✅ Hitung total
-    $totalUsers = User::count();
+        $totalUsers = User::count();
+        $totalGurus = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Guru');
+        })->count();
 
-    $totalGurus = User::whereHas('roles', function ($query) {
-        $query->where('name', 'Guru');
-    })->count();
+        $totalStudents = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Siswa');
+        })->count();
 
-    $totalStudents = User::whereHas('roles', function ($query) {
-        $query->where('name', 'Siswa');
-    })->count();
+        $totalSubjects = Subject::count();
 
-    $totalSubjects = Subject::count();
-
-    return Inertia::render('Admin/Dashboard', [
-        'userData' => $userData,
-        'guruData' => $guruData,
-
-        // ✅ Tambahkan ke frontend
-        'totalUsers' => $totalUsers,
-        'totalGurus' => $totalGurus,
-        'totalStudents' => $totalStudents,
-        'totalSubjects' => $totalSubjects,
-    ]);
-}
+        return Inertia::render('Admin/Dashboard', [
+            'userData' => $userData,
+            'guruData' => $guruData,
+            'totalUsers' => $totalUsers,
+            'totalGurus' => $totalGurus,
+            'totalStudents' => $totalStudents,
+            'totalSubjects' => $totalSubjects,
+        ]);
+    }
 
     public function guru()
     {
         $privateData = User::whereHas('roles', function ($query) {
             $query->where('name', 'Guru');
-        })->with(['roles' => function ($query) {
-            $query->where('name', 'Guru');
-        }])
+        })->with([
+                    'roles' => function ($query) {
+                        $query->where('name', 'Guru');
+                    }
+                ])
             ->latest()
             ->paginate(5, ['*'], 'privatePage'); // pagination untuk private
         return Inertia::render('Admin/Guru', [
@@ -117,19 +111,21 @@ class AdminController extends Controller
         return Inertia::render('Admin/Matapelajaran/index', [
             'subjects' => $subjects,
         ]);
-    
+
     }
 
     public function createSubject(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'context' => 'required|string|max:5000'
         ]);
-    
+
         Subject::create([
             'name' => $request->name,
+            'context' => $request->context,
         ]);
-    
+
         return redirect()->back()->with('success', 'Subject created successfully.');
     }
 
@@ -138,11 +134,13 @@ class AdminController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'context' => 'required|string|max:5000'
         ]);
 
         $subject = Subject::findOrFail($id);
         $subject->update([
             'name' => $request->name,
+            'context' => $request->context,
             // 'updated_by' => Auth::user()->id,
         ]);
 
@@ -155,16 +153,4 @@ class AdminController extends Controller
 
         return redirect()->back()->with('success', 'Subject deleted successfully.');
     }
-
-
-
-
- 
-
-
-
-
-
-
-
 }

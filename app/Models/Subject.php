@@ -14,6 +14,7 @@ class Subject extends Model
     protected $table = 'subjects';
     protected $fillable = [
         'name',
+        'context',
         'created_by',
         'updated_by',
     ];

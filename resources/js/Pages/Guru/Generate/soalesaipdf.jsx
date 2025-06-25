@@ -196,6 +196,8 @@ const Esai = () => {
                 Jumlah soal esai adalah ${data.jumlahSoalEsai} dan 
                 Jumlah soal pilihan ganda ${data.jumlahSoalPG}.
                 Pastikan total bobot seluruh (essay dan multiple_choice) berjumlah harus 100 tidak kurang dan tidak lebih, dan setiap soal harus memiliki bobot lebih dari 0.
+                Soal harus sesuai pencapaian umum sebagai berikut:
+                ${subject.find((e) => e.id === data.mapel).context}
                 Format JSON sesuai dengan schema berikut:
                 {
                   "response": [

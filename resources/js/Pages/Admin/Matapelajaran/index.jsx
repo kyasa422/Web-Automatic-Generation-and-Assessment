@@ -39,11 +39,6 @@ const Subject = () => {
     const [selectedSubject, setSelectedSubject] = useState(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
 
-
-
-
-
-
     return (
         <DefaultLayout>
 
@@ -68,6 +63,7 @@ const Subject = () => {
                             <tr className="bg-gray-2 dark:bg-meta-4">
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white pl-10">No</th>
                                 <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Name</th>
+                                <th className="py-4 px-4 text-left text-sm font-medium text-black dark:text-white">Konteks</th>
                                 <th className="py-4 px-4 text-center text-sm font-medium text-black dark:text-white">Actions</th>
                             </tr>
                         </thead>
@@ -80,8 +76,9 @@ const Subject = () => {
                                     <td className="py-4 px-4 text-sm text-black dark:text-white">
                                         {item.name}
                                     </td>
-
-
+                                    <td className="py-4 px-4 text-sm text-black dark:text-white">
+                                        {item.context}
+                                    </td>
                                     <td className="py-4 px-4 text-center">
                                         <div className="flex justify-center gap-3">
                                             <button

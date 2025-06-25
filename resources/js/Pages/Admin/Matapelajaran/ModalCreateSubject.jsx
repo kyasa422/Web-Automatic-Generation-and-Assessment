@@ -3,12 +3,13 @@ import { router } from '@inertiajs/react';
 
 const ModalCreateSubject = ({ onClose }) => {
     const [name, setName] = useState('');
+    const [context, setContext] = useState('')
     const [errors, setErrors] = useState({});
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        router.post('/admin/subject/store', { name }, {
+        router.post('/admin/subject/store', { name, context }, {
             onSuccess: () => {
                 onClose();
             },
@@ -33,6 +34,11 @@ const ModalCreateSubject = ({ onClose }) => {
                             onChange={(e) => setName(e.target.value)}
                         />
                         {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                    </div>
+                    <div className="mb-4">
+                        <label htmlFor="context" className='label'>Konteks</label>
+                        <textarea name="context" id="context" className="textarea textarea-bordered w-full" rows={7} value={context} onChange={e => setContext(e.target.value)}></textarea>
+                        {errors.context && <p className="text-red-500 text-sm mt-1">{errors.context}</p>}
                     </div>
                     <div className="flex justify-end gap-2">
                         <button

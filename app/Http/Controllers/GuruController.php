@@ -58,15 +58,12 @@ class GuruController extends Controller
 
     public function generatesoal(Request $request): Response
     {
-        $subject = Subject::select("id", "name")
+        $subject = Subject::select("id", "name", 'context')
             ->orderBy("name", "asc")
             ->get();
         return Inertia::render('Guru/Generate/soalesaipdf', [
             'subject' => $subject,
         ]);
-
-
-
     }
 
     public function store(Request $request)
@@ -176,7 +173,7 @@ class GuruController extends Controller
     }
     public function soalesai(Request $request): Response
     {
-        $subject = Subject::select("id", "name")
+        $subject = Subject::select("id", "name", 'context')
             ->orderBy("name", "asc")
             ->get();
         return Inertia::render('Guru/Generate/soalesai', [

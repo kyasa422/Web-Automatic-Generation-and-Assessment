@@ -71,6 +71,9 @@ ${requestStore.answerType === "ESSAY" ?
           `Untuk soal pilihan ganda, setiap soal harus memiliki tepat 4 opsi dengan satu jawaban yang benar.`
         }
 
+
+Soal harus sesuai capaian umum sebagai berikut:
+${subject.find(e => e.id == requestStore.subject).context}
 Buat soal yang berkualitas dan sesuai dengan tingkat kesulitan ${requestStore.class}.`
 
       const result = await genAI.models.generateContent({
