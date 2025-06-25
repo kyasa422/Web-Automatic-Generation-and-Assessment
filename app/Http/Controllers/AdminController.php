@@ -107,7 +107,7 @@ class AdminController extends Controller
 
     public function subject()
     {
-        $subjects = Subject::with('questions')->latest()->paginate(5, ['*'], 'subjectPage');
+        $subjects = Subject::with('questions')->latest()->get();
         return Inertia::render('Admin/Matapelajaran/index', [
             'subjects' => $subjects,
         ]);
