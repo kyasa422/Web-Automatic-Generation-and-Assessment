@@ -54,7 +54,7 @@ const DetailJawaban = () => {
             const response = await fetch(`${MODEL_API_URL}/score`, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
+                    "Content-Type": "application/json", 
                 },
                 body: JSON.stringify({
                     answer_student: item.studentAnswer,

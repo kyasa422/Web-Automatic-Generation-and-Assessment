@@ -1,6 +1,8 @@
 import { usePage } from "@inertiajs/react"
 import { useStore } from "../store/store"
 import { GoogleGenAI } from "@google/genai"
+import { capitalize } from "lodash"
+import { Description } from "@headlessui/react"
 
 const AnswerTypeChoiceAndSubmit = () => {
   const { env: { GEMINI_API_KEY }, subject } = usePage().props
@@ -25,11 +27,17 @@ const AnswerTypeChoiceAndSubmit = () => {
           type: "object",
           properties: {
             question: { type: "string" },
-            answer: { type: "string" },
-            answerType: { type: "string", enum: ["ESSAY"] },
-            label: { type: "string", enum: ["uraian_terbatas", "uraian_bebas"] }
+            answer: {
+              type: "string",
+              description: "Berikan jawaban dalam bentuk poin-poin rangkuman atau sebuah paragraf sangat singkat yang hanya berisi ide-ide utamanya."
+            }, answerType: { type: "string", enum: ["ESSAY"] },
+            capaian: {
+              type: "string",
+              description: "Berdasarkan pertanyaan yang dibuat, klasifikasikan jenis pengetahuan yang paling dominan diuji. Pilih HANYA SATU dari opsi yang tersedia.",
+              enum: ["Faktual", "Konseptual", "Prosedural", "Metakognitif"]
+            },
           },
-          required: ["question", "answer", "answerType", "label"]
+          required: ["question", "answer", "answerType", "capaian"],
         },
         minItems: 5,
         maxItems: 5
@@ -61,20 +69,24 @@ const AnswerTypeChoiceAndSubmit = () => {
       }
 
       const prompt = `Buatkan 5 soal berdasarkan parameter berikut:
-- class: ${requestStore.class} 
-- subject: ${subjectName}
-- type: ${subjectType}
-- answerType: ${requestStore.answerType}
+  - class: ${requestStore.class} 
+  - subject: ${subjectName}
+  - type: ${subjectType}
+  - answerType: ${requestStore.answerType}
 
-${requestStore.answerType === "ESSAY" ?
-          `Untuk soal essay, setiap soal harus memiliki label "uraian_terbatas" atau "uraian_bebas" secara bergantian.` :
-          `Untuk soal pilihan ganda, setiap soal harus memiliki tepat 4 opsi dengan satu jawaban yang benar.`
+  ${requestStore.answerType === "ESSAY"
+
         }
 
 
-Soal harus sesuai capaian umum sebagai berikut:
-${subject.find(e => e.id == requestStore.subject).context}
-Buat soal yang berkualitas dan sesuai dengan tingkat kesulitan ${requestStore.class}.`
+  Soal harus sesuai capaian umum sebagai berikut:
+  ${subject.find(e => e.id == requestStore.subject).context}
+
+  Buat soal yang berkualitas dan sesuai dengan tingkat kesulitan ${requestStore.class}.
+
+  ---
+  **PENTING:** Untuk setiap soal yang dihasilkan, kolom "answer" harus berisi **kunci jawaban berupa esai jawaban yang ideal dan faktual ** Jangan menuliskan kriteria atau pedoman cara menjawab. Posisikan diri Anda sebagai seorang ahli yang memberikan contoh jawaban sempurna atas pertanyaan tersebut.
+  ---`
 
       const result = await genAI.models.generateContent({
         contents: prompt,
@@ -87,12 +99,14 @@ Buat soal yang berkualitas dan sesuai dengan tingkat kesulitan ${requestStore.cl
       })
 
       const response = result.text
+      console.log("Response:", response)
       updateResponseStore(JSON.parse(response))
     } catch (e) {
       console.error(e)
     } finally {
       setIsLoadingStore(null)
     }
+
   }
 
   return <div className="mt-5 flex justify-center items-center gap-4">

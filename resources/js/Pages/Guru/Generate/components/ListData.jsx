@@ -81,6 +81,7 @@ const ListData = () => {
             setIsLoadingStore(`SINGLE-${index}`)
             const genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY })
             const subjectName = subject.find(e => e.id == requestStore.subject).name
+            
             const schema = answerType === "ESSAY"
                 ? {
                     type: "object",
@@ -88,9 +89,9 @@ const ListData = () => {
                         question: { type: "string" },
                         answer: { type: "string" },
                         answerType: { type: "string", enum: ["ESSAY"] },
-                        label: { type: "string", enum: ["uraian_terbatas", "uraian_bebas"] }
+                        capaian: { type: "string" }
                     },
-                    required: ["question", "answer", "answerType", "label"]
+                    required: ["question", "answer", "answerType", "capaian"]
                 }
                 : {
                     type: "object",
@@ -114,7 +115,7 @@ const ListData = () => {
                     required: ["question", "answerType", "multipleChoice"]
                 }
 
-            const prompt = `Buatkan 1 soal berdasarkan parameter berikut:\n- class: ${requestStore.class}\n- subject: ${subjectName}\n- type: ${requestStore.type === 0 ? "Ulangan Tengah Semester" : "Ulangan Akhir Semester"}\n- answerType: ${answerType}\n\n${answerType === "ESSAY" ? "Untuk soal essay, wajib menyertakan atribut label dengan nilai 'uraian_terbatas' atau 'uraian_bebas'." : "Untuk soal pilihan ganda, wajib ada 4 opsi dan satu jawaban benar."}\nJawaban harus dalam format JSON murni, hanya 1 soal, tidak kurang tidak lebih.`
+            const prompt = `Buatkan 1 soal berdasarkan parameter berikut:\n- class: ${requestStore.class}\n- subject: ${subjectName}\n- type: ${requestStore.type === 0 ? "Ulangan Tengah Semester" : "Ulangan Akhir Semester"}\n- answerType: ${answerType}\n\n${answerType === "ESSAY" ? "" : "Untuk soal pilihan ganda, wajib ada 4 opsi dan satu jawaban benar."}\nJawaban harus dalam format JSON murni, hanya 1 soal, tidak kurang tidak lebih.`
 
             const result = await genAI.models.generateContent({
                 contents: prompt,
@@ -133,6 +134,7 @@ const ListData = () => {
         } finally {
             setIsLoadingStore(null)
         }
+
     }
 
     return <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -156,7 +158,7 @@ const ListData = () => {
                         responseStore.map((e, index) => <div className="p-6 space-y-6" key={index}>
                             <div className="border p-6 rounded-lg">
                                 <div className="flex justify-between items-center mb-4">
-                                    <h3 className="font-bold">Soal {index + 1} {e.label === "uraian_terbatas" ? "" : null}</h3>
+                                    <h3 className="font-bold">Soal {index + 1} <span className="bg-green-300 rounded-lg px-2"> {" Capaian " + e.capaian }</span> </h3>
                                     <div className="flex items-center gap-3">
                                         <button type="button" className="btn btn-circle btn-sm btn-ghost" onClick={() => handleOnClickQuestionEdit(index)}>
                                             {edit == null || edit.index != index ? <FaPencilAlt /> : <FaCheck />}
