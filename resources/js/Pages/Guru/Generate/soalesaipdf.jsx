@@ -473,7 +473,7 @@ const Esai = () => {
                             {/* Material Upload */}
                             <div className="mb-4.5">
                                 <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                                    Upload Materi (PDF/Docx/Txt)
+                                    Upload Materi (PDF)
                                 </label>
                                 <input
                                     required
